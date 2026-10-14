@@ -440,31 +440,34 @@ else:
 
 st.divider()
 
-# ----------------- EMAIL DISPATCH SECTION (ADMIN / DEV ONLY) -----------------
-if is_admin_or_dev:
-    with st.expander("📧 Email Weekly MIS Report to Officials / Clients", expanded=False):
-        c_mail1, c_mail2 = st.columns([3, 1])
-        with c_mail1:
-            target_email = st.text_input(
-                "Recipient Email Address",
-                value=st.secrets.get("SIR_REPORT_EMAIL", "alifaiz9111@gmail.com"),
-                placeholder="Enter email to receive the report"
-            )
-        with c_mail2:
-            st.write("")
-            st.write("")
-            send_btn = st.button("🚀 Send Report Now", use_container_width=True)
+# ----------------- EMAIL DISPATCH SECTION (DEV ONLY) -----------------
+if st.session_state.user_role == "dev":
+    st.subheader("📧 Developer MIS Dispatcher")
+    c_mail1, c_mail2 = st.columns([3, 1])
 
-        if send_btn:
-            if not target_email or "@" not in target_email:
-                st.error("Please enter a valid email address.")
-            else:
-                with st.spinner(f"Generating spreadsheet and sending to {target_email}..."):
-                    try:
-                        send_custom_report(target_email.strip())
-                        st.success(f"✅ Weekly MIS report successfully emailed to {target_email}!")
-                    except Exception as e:
-                        st.error(f"❌ Failed to dispatch email: {e}")
+    with c_mail1:
+        target_email = st.text_input(
+            "Send Report To Any Email",
+            value="",
+            placeholder="e.g. client@example.com, official@indianoil.in",
+            key="dev_custom_email_input"
+        )
+
+    with c_mail2:
+        st.write("")
+        st.write("")
+        send_btn = st.button("🚀 Send MIS Report", use_container_width=True, key="dev_send_mis_btn")
+
+    if send_btn:
+        if not target_email or "@" not in target_email:
+            st.error("Please enter a valid email address.")
+        else:
+            with st.spinner(f"Generating Excel report and sending to {target_email}..."):
+                try:
+                    send_custom_report(target_email.strip())
+                    st.success(f"✅ Report successfully dispatched to {target_email}!")
+                except Exception as e:
+                    st.error(f"❌ Failed to send email: {e}")
 
     st.divider()
 
