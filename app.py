@@ -88,6 +88,7 @@ ro_code = st.query_params.get("ro", None)
 # Logo Display
 c1, c2, c3 = st.columns([1, 1.2, 1])
 with c2:
+    st.markdown("<br><br>")
     if os.path.exists(LOCAL_LOGO_PATH):
         st.image(LOCAL_LOGO_PATH, use_container_width=True)
     elif os.path.exists("Indian_Oil_Logo.png"):
