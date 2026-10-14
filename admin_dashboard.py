@@ -1,5 +1,11 @@
 import io
 import os
+import smtplib
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email import encoders
 import streamlit as st
 from supabase import create_client, Client
 import pandas as pd
@@ -72,6 +78,79 @@ def to_excel_bytes(df: pd.DataFrame) -> bytes:
         df.to_excel(writer, index=False, sheet_name="Report")
     return output.getvalue()
 
+def send_custom_report(recipient_email: str):
+    today = datetime.now()
+    seven_days_ago = (today - timedelta(days=7)).strftime("%Y-%m-%dT00:00:00")
+
+    entries_res = db.table("campaign_entries").select("*").gte("created_at", seven_days_ago).execute()
+    outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, sales_area").execute()
+    vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status").execute()
+
+    df_e = pd.DataFrame(entries_res.data or [])
+    df_o = pd.DataFrame(outlets_res.data or [])
+    df_v = pd.DataFrame(vouchers_res.data or [])
+
+    if not df_e.empty and not df_o.empty:
+        df_e = df_e.merge(df_o, on="ro_code", how="left")
+        ro_summary = df_e.groupby(["ro_code", "ro_name", "district"]).agg(
+            Total_Scans=("bill_number", "count"),
+            Total_Sales_Value=("amount", "sum"),
+            Vouchers_Won=("voucher_code", lambda x: x.notnull().sum()),
+            Unique_Customers=("phone_number", "nunique")
+        ).reset_index().sort_values(by="Total_Scans", ascending=False)
+    else:
+        ro_summary = pd.DataFrame({"Status": ["No scans in the last 7 days"]})
+
+    vault_summary = df_v.groupby(["ro_code", "status"]).size().unstack(fill_value=0).reset_index() if not df_v.empty else pd.DataFrame({"Status": ["No voucher data"]})
+
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+        ro_summary.to_excel(writer, sheet_name="RO_Weekly_Performance", index=False)
+        vault_summary.to_excel(writer, sheet_name="Voucher_Inventory", index=False)
+        if not df_e.empty:
+            df_e.to_excel(writer, sheet_name="Transaction_Audit", index=False)
+        else:
+            pd.DataFrame({"Status": ["No transactions logged"]}).to_excel(writer, sheet_name="Transaction_Audit", index=False)
+
+    excel_buffer.seek(0)
+    date_str = today.strftime("%d-%b-%Y")
+    scan_count = len(df_e)
+    total_sales = float(df_e["amount"].sum()) if not df_e.empty and "amount" in df_e.columns else 0.0
+
+    sender_email = st.secrets["SMTP_SENDER_EMAIL"]
+    sender_password = st.secrets["SMTP_SENDER_PASSWORD"]
+
+    msg = MIMEMultipart()
+    msg["From"] = sender_email
+    msg["To"] = recipient_email
+    msg["Subject"] = f"IOCL Kolkata DO - Weekly Campaign MIS Report ({date_str})"
+
+    body = f"""Dear Sir,
+
+Please find attached the Weekly Campaign MIS Report for the QR Sales Promotion Campaign (MS/XP95/XP100) under Kolkata Divisional Office.
+
+Weekly Summary:
+- Total Scans/Entries: {scan_count:,}
+- Total Fuel Sales Value Recorded: ₹{total_sales:,.2f}
+
+Detailed outlet-wise breakups, voucher vault statuses, and audit transactions are included in the attached spreadsheet.
+
+Warm regards,
+Adnet Advertising Campaign Operations Team
+"""
+    msg.attach(MIMEText(body, "plain"))
+
+    part = MIMEBase("application", "octet-stream")
+    part.set_payload(excel_buffer.getvalue())
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition", f"attachment; filename=IOCL_Weekly_MIS_{date_str}.xlsx")
+    msg.attach(part)
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, [recipient_email], msg.as_string())
+
 for key, default in [
     ("authenticated", False),
     ("user_role", None),
@@ -115,7 +194,7 @@ def login(username, password):
             if password == stored_password:
                 st.session_state.authenticated = True
                 st.session_state.user_role = "ro"
-                st.session_state.ro_code = ro_row["ro_code"]
+                st.session_state.ro_code = row_val if (row_val := ro_row.get("ro_code")) else ro_row["ro_code"]
                 st.session_state.ro_name = ro_row["ro_name"]
                 st.session_state.login_error = None
                 st.rerun()
@@ -360,6 +439,34 @@ else:
     col4.metric("Vouchers Remaining", f"{available_vouchers}")
 
 st.divider()
+
+# ----------------- EMAIL DISPATCH SECTION (ADMIN / DEV ONLY) -----------------
+if is_admin_or_dev:
+    with st.expander("📧 Email Weekly MIS Report to Officials / Clients", expanded=False):
+        c_mail1, c_mail2 = st.columns([3, 1])
+        with c_mail1:
+            target_email = st.text_input(
+                "Recipient Email Address",
+                value=st.secrets.get("SIR_REPORT_EMAIL", "alifaiz9111@gmail.com"),
+                placeholder="Enter email to receive the report"
+            )
+        with c_mail2:
+            st.write("")
+            st.write("")
+            send_btn = st.button("🚀 Send Report Now", use_container_width=True)
+
+        if send_btn:
+            if not target_email or "@" not in target_email:
+                st.error("Please enter a valid email address.")
+            else:
+                with st.spinner(f"Generating spreadsheet and sending to {target_email}..."):
+                    try:
+                        send_custom_report(target_email.strip())
+                        st.success(f"✅ Weekly MIS report successfully emailed to {target_email}!")
+                    except Exception as e:
+                        st.error(f"❌ Failed to dispatch email: {e}")
+
+    st.divider()
 
 # ----------------- 2. LEADERBOARD & FUEL BREAKDOWN -----------------
 left_col, right_col = st.columns([1, 1])
