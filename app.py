@@ -94,8 +94,8 @@ with c2:
         st.image("Indian_Oil_Logo.png", use_container_width=True)
     else:
         st.image(PROD_FALLBACK_URL, use_container_width=True)
-    st.markdown("<h4 style='text-align: center; margin-top: -10px; margin-left: 25px;'>Indian Oil</h4>", unsafe_allow_html=True)
-    
+    st.markdown("<h4 style='text-align: center; margin-top: -30px; margin-left: 25px;'>Indian Oil</h4>", unsafe_allow_html=True)
+
 if not ro_code:
     st.error("⚠️ Invalid station link. Please scan the official QR code at the IndianOil fuel dispenser.")
     st.stop()
