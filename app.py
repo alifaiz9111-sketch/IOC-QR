@@ -170,12 +170,17 @@ if st.session_state.form_submitted:
         st.write("")
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.link_button("🔗 Claim Voucher on Amazon", url=claim_url, use_container_width=True):
+            if st.button("🛒 Claim on Amazon", use_container_width=True, key="btn_claim_amazon"):
                 mark_voucher_claimed(result["vault_id"])
+                st.session_state["opened_amazon"] = True
+
+            if st.session_state.get("opened_amazon", False):
+                st.link_button("👉 Proceed to Amazon Claim Page", url=claim_url, use_container_width=True)
+
         with c_btn2:
-            if st.button("📋 Copy / Mark Received", use_container_width=True):
+            if st.button("📋 Copy / Mark Received", use_container_width=True, key="btn_copy_received"):
                 mark_voucher_claimed(result["vault_id"])
-                st.success("Voucher marked as received!")
+                st.success("✅ Voucher marked as claimed!")
 
     else:
         st.markdown(
