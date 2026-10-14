@@ -115,8 +115,8 @@ st.markdown(
         <p style="margin: 3px 0 0 0; color: #64748b; font-size: 13px;">| <b>RO Code:</b> {ro_code} <br>| <b>Location:</b> {ro_address}</p>
     </div>
     <div class="welcome-banner">
-        🎉 <b>Welcome to {ro_name}!</b><br>
-        Fuel ₹500+ and stand a chance to unlock instant Amazon vouchers + Lucky Draw entries!
+        🎉 <b>Welcome to IndianOil {ro_name}!</b><br>
+        Enter your receipt details below for a chance to win instant Amazon vouchers on your fill today.
     </div>
     """,
     unsafe_allow_html=True
@@ -134,56 +134,74 @@ def mark_voucher_claimed(vault_id: int):
             "claimed_at": "now()"
         }).eq("id", vault_id).execute()
 
-# ----------------- RESULT / CLAIM VIEW -----------------
+# ----------------- 2. RESULT SCREENS (WIN & BETTER LUCK NEXT TIME) -----------------
 if st.session_state.form_submitted:
     result = st.session_state.submission_result
 
     if result["outcome"] == "WON":
+        claim_url = result.get("claim_link") or f"https://www.amazon.in/g/claim?code={result['voucher_code']}"
+
         st.markdown(
             f"""
-            <div class="result-card-win">
-                <h2 style="color: #065f46; margin-bottom: 6px;">🎉 Congratulations, {result['name']}!</h2>
+            <div class="result-card-win" style="text-align: left; line-height: 1.6;">
+                <h3 style="color: #065f46; margin-top: 0;">Heartiest Congratulations, {result['name']}! 🌟</h3>
                 <p style="font-size: 15px; color: #047857; margin-bottom: 12px;">
-                    You won a <b>₹{result['denomination']}</b> Amazon Voucher!
+                    Thank you for fuelling at IndianOil <b>{ro_name}</b>. You have won an <b>Amazon Voucher worth Rs. {result['denomination']}!</b> 💳✨
                 </p>
-                <div style="background: #ffffff; border: 1px dashed #10b981; border-radius: 8px; padding: 12px; margin: 12px 0;">
-                    <div style="font-size: 12px; color: #6b7280;">Voucher Code:</div>
+                <div style="background: #ffffff; border: 1px dashed #10b981; border-radius: 8px; padding: 14px; text-align: center; margin: 15px 0;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">YOUR VOUCHER CODE</div>
                     <div style="font-size: 22px; font-weight: 800; color: #f37022; letter-spacing: 2px;">{result['voucher_code']}</div>
                 </div>
-                <p style="font-size: 12px; color: #047857;">
-                    ✅ Your entry is registered for the Apple iPhone 17 Pro Max & vivo T4 5G Lucky Draw!
+                <p style="font-size: 14px; color: #374151; margin-bottom: 4px;">
+                    Keep fuelling, keep winning! 🚗💨
+                </p>
+                <p style="font-size: 13px; font-weight: 600; color: #f37022; margin-top: 0;">
+                    — Team IndianOil
+                </p>
+                <hr style="border: 0; border-top: 1px solid #d1fae5; margin: 15px 0;">
+                <p style="font-size: 12px; color: #047857; margin-bottom: 0;">
+                    ✅ <i>Your entry has also been registered for the Apple iPhone 17 Pro Max & vivo 5G Lucky Draw!</i>
                 </p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        claim_url = result.get("claim_link") or f"https://www.amazon.in/g/claim?code={result['voucher_code']}"
-
+        st.write("")
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.link_button("🛒 Redeem on Amazon", url=claim_url, use_container_width=True):
+            if st.link_button("🔗 Claim Voucher on Amazon", url=claim_url, use_container_width=True):
                 mark_voucher_claimed(result["vault_id"])
         with c_btn2:
             if st.button("📋 Copy / Mark Received", use_container_width=True):
                 mark_voucher_claimed(result["vault_id"])
-                st.success("Code marked as received!")
+                st.success("Voucher marked as received!")
+
     else:
         st.markdown(
             f"""
-            <div class="result-card-loss">
-                <h3 style="color: #475569; margin-bottom: 6px;">Better Luck Next Time! ⛽</h3>
-                <p style="font-size: 14px; color: #64748b; margin-bottom: 8px;">
-                    Thank you for fueling with IndianOil, <b>{result['name']}</b>.
+            <div class="result-card-loss" style="text-align: left; line-height: 1.6;">
+                <h3 style="color: #475569; margin-top: 0;">Better Luck Next Time! ⛽</h3>
+                <p style="font-size: 15px; color: #334155; margin-bottom: 12px;">
+                    Thank you for fuelling with IndianOil, <b>{result['name']}</b> at <b>{ro_name}</b>.
                 </p>
-                <p style="font-size: 13px; color: #166534; font-weight: 600;">
-                    🎉 Good news! Your entry has been registered for the Mega Lucky Draw (Apple iPhone 17 Pro Max & vivo smartphones)!
+                <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; margin: 12px 0;">
+                    <p style="font-size: 13px; color: #065f46; font-weight: 600; margin: 0;">
+                        🎉 Good news! Your receipt has been successfully entered into the <b>Mega Lucky Draw</b> for the Apple iPhone 17 Pro Max & vivo 5G Smartphones!
+                    </p>
+                </div>
+                <p style="font-size: 14px; color: #374151; margin-bottom: 4px;">
+                    Keep fuelling, keep winning! 🚗💨
+                </p>
+                <p style="font-size: 13px; font-weight: 600; color: #f37022; margin-top: 0;">
+                    — Team IndianOil
                 </p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
+    st.write("")
     if st.button("Back to Home", use_container_width=True):
         st.session_state.form_submitted = False
         st.session_state.submission_result = None
