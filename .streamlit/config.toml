@@ -1,8 +1,24 @@
+# [theme]
+# primaryColor = "#f37022"
+# backgroundColor = "#ffffff"
+# secondaryBackgroundColor = "#fff7ed"
+# textColor = "#1e293b"
+# font = "sans-serif"
+
+# [server]
+# enableCORS = false
+# enableXsrfProtection = true
+
+
+
+
+
 [theme]
+base = "dark"
 primaryColor = "#f37022"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#fff7ed"
-textColor = "#1e293b"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1e222a"
+textColor = "#f1f5f9"
 font = "sans-serif"
 
 [server]
