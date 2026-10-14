@@ -10,7 +10,12 @@ import streamlit as st
 from supabase import create_client, Client
 import pandas as pd
 
-st.set_page_config(page_title="IOCL Portal", page_icon="⛽", layout="wide")
+from PIL import Image
+
+# Load logo for browser tab favicon
+logo_img = "Indian_Oil_Logo.png" if os.path.exists("Indian_Oil_Logo.png") else "⛽"
+
+st.set_page_config(page_title="IOCL Portal", page_icon=logo_img, layout="wide")
 
 # IndianOil Theme CSS Injection (#f37022)
 st.markdown(

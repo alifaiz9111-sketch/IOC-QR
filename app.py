@@ -5,7 +5,12 @@ import streamlit as st
 from supabase import create_client, Client
 
 # Mobile-first page layout
-st.set_page_config(page_title="IndianOil Rewards", page_icon="⛽", layout="centered")
+from PIL import Image
+
+# Load logo for browser tab favicon
+logo_img = "Indian_Oil_Logo.png" if os.path.exists("Indian_Oil_Logo.png") else "⛽"
+
+st.set_page_config(page_title="IndianOil Rewards", page_icon=logo_img, layout="centered")
 
 # Branding CSS (#f37022 Saffron Accent)
 st.markdown(
