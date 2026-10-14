@@ -85,13 +85,17 @@ PROD_FALLBACK_URL = "https://images.seeklogo.com/logo-png/28/1/indian-oil-logo-p
 
 ro_code = st.query_params.get("ro", None)
 
+# Logo Display
 c1, c2, c3 = st.columns([1, 1.2, 1])
 with c2:
     if os.path.exists(LOCAL_LOGO_PATH):
         st.image(LOCAL_LOGO_PATH, use_container_width=True)
+    elif os.path.exists("Indian_Oil_Logo.png"):
+        st.image("Indian_Oil_Logo.png", use_container_width=True)
     else:
         st.image(PROD_FALLBACK_URL, use_container_width=True)
-
+    st.markdown("<h4 style='text-align: center; margin-top: -10px; margin-left: 25px;'>Indian Oil</h4>", unsafe_allow_html=True)
+    
 if not ro_code:
     st.error("⚠️ Invalid station link. Please scan the official QR code at the IndianOil fuel dispenser.")
     st.stop()
