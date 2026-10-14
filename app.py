@@ -174,13 +174,18 @@ if st.session_state.form_submitted:
                 mark_voucher_claimed(result["vault_id"])
                 st.session_state["opened_amazon"] = True
 
-            if st.session_state.get("opened_amazon", False):
-                st.link_button("👉 Proceed to Amazon Claim Page", url=claim_url, use_container_width=True)
-
         with c_btn2:
             if st.button("📋 Copy / Mark Received", use_container_width=True, key="btn_copy_received"):
                 mark_voucher_claimed(result["vault_id"])
-                st.success("✅ Voucher marked as claimed!")
+                st.session_state["voucher_copied"] = True
+
+        # Render action confirmations / links only after a click occurs
+        if st.session_state.get("opened_amazon", False):
+            st.success("✅ Status updated to Claimed! Tap below to open Amazon:")
+            st.link_button("👉 Open Amazon Claim Page", url=claim_url, use_container_width=True)
+
+        if st.session_state.get("voucher_copied", False):
+            st.success(f"✅ Voucher marked as Claimed! Code: **{result['voucher_code']}**")
 
     else:
         st.markdown(
