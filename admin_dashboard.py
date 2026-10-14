@@ -232,7 +232,7 @@ if not st.session_state.authenticated:
             else:
                 st.image(PROD_FALLBACK_URL, use_container_width=True)
 
-        st.markdown("<h4 style='text-align: center; margin-top: -10px; margin-left: 25px;'>IndianOil</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; margin-top: -25px; margin-left: 25px;'>IndianOil</h4>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; color: gray; margin-bottom: 20px;'>Retail Campaign Management Portal</p>", unsafe_allow_html=True)
 
         if st.session_state.login_error:
