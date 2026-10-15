@@ -1,5 +1,6 @@
 import os
 import re
+import random
 from datetime import date
 import streamlit as st
 from supabase import create_client, Client
@@ -368,25 +369,23 @@ if submit_pressed:[cite: 12]
                 if claimed_today >= total_avail:[cite: 12]
                     has_quota = False[cite: 12]
 
-            if has_quota:[cite: 12]
-                # 5. Fetch available voucher using claim_link directly
+            if has_quota:
+                # 5. Fetch all available vouchers for this station
                 v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                     .eq("ro_code", ro_code)\
                     .ilike("status", "available")\
-                    .order("id")\
-                    .limit(1)\
-                    .execute()[cite: 12]
+                    .execute()
 
-                if not v_res.data:[cite: 12]
+                # Fallback to general unassigned pool if station-specific supply is empty
+                if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .ilike("status", "available")\
-                        .order("id")\
-                        .limit(1)\
-                        .execute()[cite: 12]
+                        .execute()
 
-                if v_res.data:[cite: 12]
-                    assigned_voucher = v_res.data[0][cite: 12]
-                    is_winner = True[cite: 12]
+                if v_res.data:
+                    # Randomly pick a voucher from all available vouchers
+                    assigned_voucher = random.choice(v_res.data)
+                    is_winner = True
                     
                     db.table("voucher_vault").update({
                         "status": "Allocated",
