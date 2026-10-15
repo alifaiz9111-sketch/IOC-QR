@@ -353,7 +353,7 @@ if submit_pressed:
             .execute()
 
         current_scan_number = (today_ro_scans.count or 0) + 1
-        is_cadence_winner = (current_scan_number % 10 == 3)
+        is_cadence_winner = (current_scan_number % 2 == 1)
 
         assigned_voucher = None
         is_winner = False
