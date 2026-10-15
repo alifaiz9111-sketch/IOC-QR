@@ -1,19 +1,17 @@
 import pandas as pd
-import toml
 from supabase import create_client
 
-# 1. Load Supabase credentials from your secrets file
-secrets = toml.load(".streamlit/secrets.toml")
-SUPABASE_URL = secrets["SUPABASE_URL"]
-SUPABASE_KEY = secrets["SUPABASE_KEY"]
+# Credentials
+SUPABASE_URL = "https://atpvqeibzuzhhuowzbtk.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cHZxZWlienV6aGh1b3d6YnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNjc4NjEsImV4cCI6MjEwNjk0Mzg2MX0.yrw0p1S7moCcUoEMdvDSnmhlWPP076CNF57_QqeEIos"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# 2. Read the Excel file
+# Read the uploaded Excel file
 EXCEL_FILE = "vouchers.xlsx"
 df = pd.read_excel(EXCEL_FILE)
 
-# Clean column headers
+# Normalize column names
 df.columns = df.columns.str.strip().str.lower()
 
 records = []
@@ -22,11 +20,11 @@ for _, row in df.iterrows():
     if not link or link.lower() == "nan":
         continue
 
-    # RO code (optional: None if left blank for global pool)
+    # Station assignment (None if global)
     ro = str(row.get("ro_code", "")).strip()
     ro_code_val = ro if ro and ro.lower() != "nan" else None
 
-    # Denomination (default 40 if missing)
+    # Face value
     denom = row.get("denomination", 40)
     try:
         denom = int(denom)
@@ -41,7 +39,7 @@ for _, row in df.iterrows():
         "status": "Available"
     })
 
-# 3. Bulk insert into Supabase voucher_vault
+# Bulk insert
 if records:
     print(f"Uploading {len(records)} vouchers to Supabase...")
     response = supabase.table("voucher_vault").insert(records).execute()
