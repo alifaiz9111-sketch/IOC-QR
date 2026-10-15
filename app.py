@@ -77,6 +77,16 @@ def init_supabase() -> Client:
 
 db = init_supabase()
 
+def mark_voucher_claimed(vault_id: int):
+    if vault_id:
+        try:
+            db.table("voucher_vault").update({
+                "status": "Claimed",
+                "claimed_at": "now()"
+            }).eq("id", vault_id).execute()
+        except Exception:
+            pass
+
 # ----------------- CLAIM MODAL DIALOG -----------------
 @st.dialog("🎉 Congratulations!")
 def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
@@ -85,8 +95,8 @@ def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
     
     st.markdown(
         f"""
-        <div style="background: #ffffff; border: 1px dashed #10b981; border-radius: 8px; padding: 12px; margin: 12px 0; word-break: break-all;">
-            <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">YOUR AMAZON CLAIM LINK:</div>
+        <div style="background: #ffffff; border: 1px dashed #10b981; border-radius: 8px; padding: 14px; margin: 12px 0; word-break: break-all; text-align: center;">
+            <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">YOUR AMAZON CLAIM LINK:</div>
             <a href="{claim_link}" target="_blank" style="font-size: 15px; font-weight: 700; color: #f37022; text-decoration: underline;">
                 {claim_link}
             </a>
@@ -94,14 +104,14 @@ def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
         """,
         unsafe_allow_html=True
     )
-    st.write("Click below to claim and open your voucher directly on Amazon:")
+    st.write("Click below to open and claim your voucher directly on Amazon:")
 
     def on_claim_click():
         mark_voucher_claimed(voucher_id)
 
     st.link_button(
-        "🎁 Claim Amazon Voucher",
-        claim_link,
+        "🎁 Open Amazon & Claim Voucher",
+        url=claim_link,
         use_container_width=True,
         on_click=on_claim_click
     )
@@ -163,16 +173,6 @@ if "form_submitted" not in st.session_state:
 if "submission_result" not in st.session_state:
     st.session_state.submission_result = None
 
-def mark_voucher_claimed(vault_id: int):
-    if vault_id:
-        try:
-            db.table("voucher_vault").update({
-                "status": "Claimed",
-                "claimed_at": "now()"
-            }).eq("id", vault_id).execute()
-        except Exception:
-            pass
-
 # Trigger Modal Dialog if pending
 if st.session_state.get("pending_dialog") == "WINNER":
     v_data = st.session_state.get("winning_voucher_data", {})
@@ -188,7 +188,7 @@ if st.session_state.form_submitted:
     result = st.session_state.submission_result
 
     if result["outcome"] == "WON":
-        claim_url = result.get("claim_link") or f"https://www.amazon.in/g/claim?code={result.get('voucher_code', '')}"
+        claim_url = result.get("claim_link", "#")
 
         st.markdown(
             f"""
@@ -198,8 +198,8 @@ if st.session_state.form_submitted:
                     Thank you for fuelling at IndianOil <b>{ro_name}</b>. You have won an <b>Amazon Voucher worth Rs. {result['denomination']}!</b> 💳✨
                 </p>
                 <div style="background: #ffffff; border: 1px dashed #10b981; border-radius: 8px; padding: 14px; text-align: center; margin: 15px 0; word-break: break-all;">
-                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">YOUR AMAZON CLAIM LINK</div>
-                    <a href="{claim_url}" target="_blank" style="font-size: 16px; font-weight: 700; color: #f37022; text-decoration: underline;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">YOUR AMAZON CLAIM LINK:</div>
+                    <a href="{claim_url}" target="_blank" style="font-size: 15px; font-weight: 700; color: #f37022; text-decoration: underline;">
                         {claim_url}
                     </a>
                 </div>
@@ -221,18 +221,21 @@ if st.session_state.form_submitted:
         st.write("")
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.button("🛒 Claim on Amazon", use_container_width=True, key="btn_claim_amazon"):
-                mark_voucher_claimed(result["vault_id"])
+            def on_claim_amazon():
+                mark_voucher_claimed(result.get("vault_id"))
                 st.session_state["opened_amazon"] = True
+
+            st.link_button(
+                "🛒 Open Amazon & Claim",
+                url=claim_url,
+                use_container_width=True,
+                on_click=on_claim_amazon
+            )
 
         with c_btn2:
             if st.button("📋 Copy / Mark Received", use_container_width=True, key="btn_copy_received"):
-                mark_voucher_claimed(result["vault_id"])
+                mark_voucher_claimed(result.get("vault_id"))
                 st.session_state["voucher_copied"] = True
-
-        if st.session_state.get("opened_amazon", False):
-            st.success("✅ Status updated to Claimed! Tap below to open Amazon:")
-            st.link_button("👉 Open Amazon Claim Page", url=claim_url, use_container_width=True)
 
         if st.session_state.get("voucher_copied", False):
             st.success(f"✅ Voucher marked as Claimed! Link: {claim_url}")
@@ -338,8 +341,7 @@ if submit_pressed:
                 "fuel_grade": fuel_grade,
                 "transaction_no": transaction_no,
                 "amount": float(amount),
-                "outcome": "Better Luck Next Time",
-                "voucher_code": None
+                "outcome": "Better Luck Next Time"
             }).execute()
 
             st.session_state.form_submitted = True
@@ -374,8 +376,8 @@ if submit_pressed:
                     has_quota = False
 
             if has_quota:
-                # 5. Fetch available voucher (station-specific first, fallback to general)
-                v_res = db.table("voucher_vault").select("id, voucher_code, denomination, claim_link")\
+                # 5. Fetch available voucher using claim_link directly
+                v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                     .eq("ro_code", ro_code)\
                     .ilike("status", "available")\
                     .order("id")\
@@ -383,7 +385,7 @@ if submit_pressed:
                     .execute()
 
                 if not v_res.data:
-                    v_res = db.table("voucher_vault").select("id, voucher_code, denomination, claim_link")\
+                    v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .ilike("status", "available")\
                         .order("id")\
                         .limit(1)\
@@ -410,14 +412,13 @@ if submit_pressed:
                     st.session_state.pending_dialog = "WINNER"
                     st.session_state.winning_voucher_data = {
                         "id": assigned_voucher["id"],
-                        "claim_link": assigned_voucher.get("claim_link") or f"https://www.amazon.in/g/claim?code={assigned_voucher['voucher_code']}",
+                        "claim_link": assigned_voucher["claim_link"],
                         "denomination": assigned_voucher.get("denomination", 40)
                     }
 
         # 6. Insert Entry
         final_outcome = "Won" if is_winner else "Better Luck Next Time"
-        assigned_code = assigned_voucher["voucher_code"] if is_winner else None
-        claim_url = (assigned_voucher.get("claim_link") or f"https://www.amazon.in/g/claim?code={assigned_code}") if is_winner else None
+        claim_url = assigned_voucher["claim_link"] if is_winner else None
         denom_val = assigned_voucher.get("denomination", 40) if is_winner else 40
         vault_id = assigned_voucher["id"] if is_winner else None
 
@@ -429,8 +430,7 @@ if submit_pressed:
             "fuel_grade": fuel_grade,
             "transaction_no": transaction_no,
             "amount": float(amount),
-            "outcome": final_outcome,
-            "voucher_code": assigned_code
+            "outcome": final_outcome
         }).execute()
 
         st.session_state.form_submitted = True
@@ -438,7 +438,6 @@ if submit_pressed:
             "outcome": "WON" if is_winner else "LOST",
             "name": customer_name,
             "phone": mobile_no,
-            "voucher_code": assigned_code,
             "claim_link": claim_url,
             "denomination": denom_val,
             "vault_id": vault_id
