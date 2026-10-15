@@ -1,8 +1,7 @@
-import re
 import pandas as pd
 from supabase import create_client
 
-# Credentials
+# Supabase Credentials
 SUPABASE_URL = "https://atpvqeibzuzhhuowzbtk.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cHZxZWlienV6aGh1b3d6YnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNjc4NjEsImV4cCI6MjEwNjk0Mzg2MX0.yrw0p1S7moCcUoEMdvDSnmhlWPP076CNF57_QqeEIos"
 
@@ -17,18 +16,12 @@ df.columns = df.columns.str.strip().str.lower()
 
 records = []
 for idx, row in df.iterrows():
+    # Complete, unstripped link
     link = str(row.get("claim_link", "")).strip()
     if not link or link.lower() == "nan":
         continue
 
-    # Extract unique code from Amazon link (e.g., '1E8NN2G0CNPJBL18' from '/g/1E8NN2G0CNPJBL18?...')
-    match = re.search(r"/g/([A-Za-z0-9]+)", link)
-    if match:
-        v_code = match.group(1)
-    else:
-        v_code = f"AMZN_{idx+1}"
-
-    # Station assignment (None if global pool)
+    # RO assignment (None if global fallback pool)
     ro = str(row.get("ro_code", "")).strip()
     ro_code_val = ro if ro and ro.lower() != "nan" else None
 
@@ -41,7 +34,6 @@ for idx, row in df.iterrows():
 
     records.append({
         "ro_code": ro_code_val,
-        "voucher_code": v_code,
         "denomination": denom,
         "claim_link": link,
         "status": "Available"
@@ -49,8 +41,8 @@ for idx, row in df.iterrows():
 
 # Bulk insert
 if records:
-    print(f"Uploading {len(records)} vouchers to Supabase...")
+    print(f"Uploading {len(records)} vouchers directly to Supabase...")
     response = supabase.table("voucher_vault").insert(records).execute()
-    print(f"Successfully uploaded {len(response.data)} vouchers!")
+    print(f"Successfully uploaded {len(response.data)} vouchers with complete URLs!")
 else:
     print("No valid vouchers found in the Excel file.")
