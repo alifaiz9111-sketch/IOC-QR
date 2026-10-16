@@ -100,7 +100,7 @@ def send_custom_report(recipient_email: str):
         ro_summary = df_e.groupby(["ro_code", "ro_name", "district"]).agg(
             Total_Scans=("bill_number", "count"),
             Total_Sales_Value=("amount", "sum"),
-            Vouchers_Won=("voucher_code", lambda x: x.notnull().sum()),
+            Vouchers_Won=("claim_link", lambda x: x.notnull().sum()),
             Unique_Customers=("phone_number", "nunique")
         ).reset_index().sort_values(by="Total_Scans", ascending=False)
     else:
@@ -397,7 +397,7 @@ if not filtered_df.empty:
             filtered_df["customer_name"].astype(str).str.contains(search_query, case=False, na=False) |
             filtered_df["phone_number"].astype(str).str.contains(search_query, case=False, na=False) |
             filtered_df["bill_number"].astype(str).str.contains(search_query, case=False, na=False) |
-            filtered_df["voucher_code"].astype(str).str.contains(search_query, case=False, na=False)
+            filtered_df["claim_link"].astype(str).str.contains(search_query, case=False, na=False)
         )
         filtered_df = filtered_df[mask]
 
@@ -487,7 +487,7 @@ with left_col:
                 Scans=("bill_number", "count"),
                 Total_Sales=("amount", "sum"),
                 Avg_Bill=("amount", "mean"),
-                Winners=("voucher_code", lambda x: x.notnull().sum())
+                Winners=("claim_link", lambda x: x.notnull().sum())
             ).reset_index().sort_values(by="Scans", ascending=False)
             st.dataframe(outlet_agg, use_container_width=True, hide_index=True)
         else:
@@ -535,7 +535,7 @@ if not filtered_df.empty:
     display_cols = [
         "Date", "Time", "ro_code", "ro_name", 
         "customer_name", "phone_number", "bill_number", 
-        "fuel_grade", "amount", "outcome", "voucher_code"
+        "fuel_grade", "amount", "outcome", "claim_link"
     ]
     available_cols = [c for c in display_cols if c in sorted_feed.columns]
 
