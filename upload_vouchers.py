@@ -16,21 +16,21 @@ df.columns = df.columns.str.strip().str.lower()
 
 records = []
 for idx, row in df.iterrows():
-    # Complete, unstripped link
-    link = str(row.get("claim_link", "")).strip()
-    if not link or link.lower() == "nan":
+    # Accept 'claim_link', 'link', or 'url'
+    link = str(row.get("claim_link") or row.get("link") or row.get("url") or "").strip()
+    if not link or link.lower() == "nan" or not link.startswith("http"):
         continue
 
-    # RO assignment (None if global fallback pool)
+    # Station assignment (None if unassigned/global fallback pool)
     ro = str(row.get("ro_code", "")).strip()
     ro_code_val = ro if ro and ro.lower() != "nan" else None
 
-    # Face value
-    denom = row.get("denomination", 40)
+    # Face value (default 10)
+    denom = row.get("denomination", 10)
     try:
-        denom = int(denom)
+        denom = int(float(denom))
     except (ValueError, TypeError):
-        denom = 40
+        denom = 10
 
     records.append({
         "ro_code": ro_code_val,
@@ -39,10 +39,16 @@ for idx, row in df.iterrows():
         "status": "Available"
     })
 
-# Bulk insert
+# Batch insert to prevent PostgREST payload limits
+BATCH_SIZE = 50
 if records:
-    print(f"Uploading {len(records)} vouchers directly to Supabase...")
-    response = supabase.table("voucher_vault").insert(records).execute()
-    print(f"Successfully uploaded {len(response.data)} vouchers with complete URLs!")
+    print(f"Uploading {len(records)} vouchers to Supabase in batches of {BATCH_SIZE}...")
+    total_uploaded = 0
+    for i in range(0, len(records), BATCH_SIZE):
+        batch = records[i:i + BATCH_SIZE]
+        response = supabase.table("voucher_vault").insert(batch).execute()
+        total_uploaded += len(response.data)
+        print(f"Uploaded {total_uploaded}/{len(records)} records...")
+    print(f"✅ Successfully uploaded {total_uploaded} vouchers with complete URLs!")
 else:
-    print("No valid vouchers found in the Excel file.")
+    print("❌ No valid voucher links found in the Excel file.")
