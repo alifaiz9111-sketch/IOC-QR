@@ -424,4 +424,4 @@ if submit_pressed:
             "denomination": denom_val,
             "vault_id": vault_id
         }
-        st.rerun()
+        st.rerun(.
