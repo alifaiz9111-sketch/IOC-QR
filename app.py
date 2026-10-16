@@ -107,14 +107,14 @@ def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
     )
     st.write("Click below to open and claim your voucher directly on Amazon:")
 
-    def on_claim_click():
-        mark_voucher_claimed(voucher_id)
+    # Mark voucher as claimed directly
+    mark_voucher_claimed(voucher_id)
 
+    # Valid link_button without invalid on_click parameter
     st.link_button(
         "🎁 Open Amazon & Claim Voucher",
         url=claim_link,
-        use_container_width=True,
-        on_click=on_claim_click
+        use_container_width=True
     )
 
 LOCAL_LOGO_PATH = "Indian_Oil_Logo.png"
@@ -222,15 +222,11 @@ if st.session_state.form_submitted:
         st.write("")
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            def on_claim_amazon():
-                mark_voucher_claimed(result.get("vault_id"))
-                st.session_state["opened_amazon"] = True
-
+            mark_voucher_claimed(result.get("vault_id"))
             st.link_button(
                 "🛒 Open Amazon & Claim",
                 url=claim_url,
-                use_container_width=True,
-                on_click=on_claim_amazon
+                use_container_width=True
             )
 
         with c_btn2:
@@ -346,25 +342,25 @@ if submit_pressed:
             }
             st.rerun()
 
-        # 3. Check today's scan cadence for this RO (3rd, 13th, 23rd, 33rd...)
+        # 3. Check today's scan cadence for this RO (1st, 3rd, 5th... odd entries)
         today_ro_scans = db.table("campaign_entries").select("id", count="exact")\
             .eq("ro_code", ro_code)\
             .gte("created_at", today_iso_start)\
             .execute()
 
         current_scan_number = (today_ro_scans.count or 0) + 1
-        is_cadence_winner = (current_scan_number)
+        is_cadence_winner = (current_scan_number % 2 == 1)
 
         assigned_voucher = None
         is_winner = False
 
         if is_cadence_winner:
-            # 4. Check available quota from ro_daily_quota (Base 16 + carried over)
+            # 4. Check available quota from ro_daily_quota
             quota_res = db.table("ro_daily_quota").select("*").eq("ro_code", ro_code).eq("quota_date", str(date.today())).execute()
             has_quota = True
             if quota_res.data:
                 q_row = quota_res.data[0]
-                total_avail = q_row.get("total_available", 16)
+                total_avail = q_row.get("total_available", 32)
                 claimed_today = q_row.get("claimed_count", 0)
                 if claimed_today >= total_avail:
                     has_quota = False
@@ -382,7 +378,6 @@ if submit_pressed:
                         .execute()
 
                 if v_res.data:
-                    # Randomly pick a voucher from all available
                     assigned_voucher = random.choice(v_res.data)
                     is_winner = True
                     
@@ -393,7 +388,6 @@ if submit_pressed:
                         "allocated_at": "now()"
                     }).eq("id", assigned_voucher["id"]).execute()
 
-                    # Update claimed count for today's quota
                     if quota_res.data:
                         db.table("ro_daily_quota").update({
                             "claimed_count": q_row.get("claimed_count", 0) + 1
