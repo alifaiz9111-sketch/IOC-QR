@@ -107,10 +107,8 @@ def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
     )
     st.write("Click below to open and claim your voucher directly on Amazon:")
 
-    # Mark voucher as claimed directly
     mark_voucher_claimed(voucher_id)
 
-    # Valid link_button without invalid on_click parameter
     st.link_button(
         "🎁 Open Amazon & Claim Voucher",
         url=claim_link,
@@ -360,7 +358,7 @@ if submit_pressed:
             has_quota = True
             if quota_res.data:
                 q_row = quota_res.data[0]
-                total_avail = q_row.get("total_available", 32)
+                total_avail = q_row.get("total_available", 16)
                 claimed_today = q_row.get("claimed_count", 0)
                 if claimed_today >= total_avail:
                     has_quota = False

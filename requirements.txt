@@ -1,5 +1,6 @@
-streamlit
+streamlit>=1.38.0
 supabase
 pandas
 openpyxl
 requests
+pillow
