@@ -303,7 +303,11 @@ df_vouchers = pd.DataFrame(vouchers) if vouchers else pd.DataFrame()
 
 if not df_entries.empty:
     df_entries["amount"] = pd.to_numeric(df_entries["amount"], errors="coerce").fillna(0.0)
-    df_entries["created_at"] = pd.to_datetime(df_entries["created_at"], errors="coerce")
+    
+    # 1. Parse UTC timestamp and convert directly to Indian Standard Time (IST)
+    df_entries["created_at"] = pd.to_datetime(df_entries["created_at"], errors="coerce", utc=True).dt.tz_convert("Asia/Kolkata")
+    
+    # 2. Extract IST Date and Time
     df_entries["Date"] = df_entries["created_at"].dt.strftime("%d-%m-%Y")
     df_entries["Time"] = df_entries["created_at"].dt.strftime("%I:%M:%S %p")
     if not df_outlets.empty:
