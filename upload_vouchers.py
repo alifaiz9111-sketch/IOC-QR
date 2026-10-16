@@ -1,33 +1,57 @@
-from collections import Counter
 import pandas as pd
+from collections import Counter
 from supabase import create_client
 
-# ----------------- SUPABASE CONFIGURATION -----------------
+# ----------------- SUPABASE CREDENTIALS -----------------
 SUPABASE_URL = "https://atpvqeibzuzhhuowzbtk.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cHZxZWlienV6aGh1b3d6YnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNjc4NjEsImV4cCI6MjEwNjk0Mzg2MX0.yrw0p1S7moCcUoEMdvDSnmhlWPP076CNF57_QqeEIos"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ----------------- READ EXCEL FILE -----------------
 EXCEL_FILE = "vouchers.xlsx"
 df = pd.read_excel(EXCEL_FILE)
-
-# Normalize column names (strip whitespace and convert to lowercase)
 df.columns = df.columns.str.strip().str.lower()
 
+# 1. Fetch already existing links in voucher_vault to prevent duplicate insertion
+print("🔍 Checking existing links in database...")
+existing_links = set()
+try:
+    page_size = 1000
+    start = 0
+    while True:
+        res = supabase.table("voucher_vault").select("claim_link").range(start, start + page_size - 1).execute()
+        if not res.data:
+            break
+        for item in res.data:
+            if item.get("claim_link"):
+                existing_links.add(item["claim_link"].strip())
+        if len(res.data) < page_size:
+            break
+        start += page_size
+    print(f"Found {len(existing_links)} existing links in Supabase.")
+except Exception as e:
+    print(f"Warning fetching existing links: {e}")
+
+# 2. Parse, clean, and deduplicate Excel records
 records = []
+seen_in_file = set()
+
 for idx, row in df.iterrows():
-    # 1. Read claim link (accepts 'claim_link', 'link', or 'url')
-    link = str(row.get("claim_link") or row.get("link") or row.get("url") or "").strip()
+    link = str(row.get("claim_link") or row.get("link") or "").strip()
     if not link or link.lower() == "nan" or not link.startswith("http"):
         continue
 
-    # 2. Read RO Code safely (ensures empty cells become true SQL NULL)
+    # Skip duplicates within the file or already in DB
+    if link in seen_in_file or link in existing_links:
+        continue
+    seen_in_file.add(link)
+
+    # Empty ro_code becomes SQL NULL (unassigned global pool)
     raw_ro = row.get("ro_code")
     ro_str = str(raw_ro).strip() if pd.notna(raw_ro) and raw_ro is not None else ""
     ro_code_val = ro_str if ro_str and ro_str.lower() not in ("nan", "none", "") else None
 
-    # 3. Read Denomination (defaults to 10 if missing/blank)
+    # Denomination parsing
     raw_denom = row.get("denomination", 10)
     try:
         denom_val = int(float(raw_denom))
@@ -41,20 +65,17 @@ for idx, row in df.iterrows():
         "status": "Available"
     })
 
-# ----------------- BATCH UPLOAD TO DATABASE -----------------
-BATCH_SIZE = 50
+# 3. Batch Upload
+BATCH_SIZE = 100
 if records:
-    print(f"\n🚀 Found {len(records)} valid vouchers in {EXCEL_FILE}.")
-    print(f"Uploading to Supabase in batches of {BATCH_SIZE}...")
-
+    print(f"\n🚀 Ready to upload {len(records)} fresh unique vouchers...")
     total_uploaded = 0
     for i in range(0, len(records), BATCH_SIZE):
         batch = records[i:i + BATCH_SIZE]
         response = supabase.table("voucher_vault").insert(batch).execute()
         total_uploaded += len(response.data)
-        print(f"  -> Uploaded {total_uploaded}/{len(records)} vouchers...")
+        print(f"  -> Uploaded {total_uploaded}/{len(records)}...")
 
-    # Count breakdown by denomination
     counts = Counter(r["denomination"] for r in records)
     print("\n" + "=" * 38)
     print("         UPLOAD SUMMARY TABLE         ")
@@ -65,4 +86,4 @@ if records:
     print(f"   TOTAL UPLOADED : {total_uploaded:>6} vouchers")
     print("=" * 38 + "\n")
 else:
-    print("\n❌ No valid vouchers with HTTP/HTTPS links found in the Excel file.")
+    print("\n✅ All links in this Excel file are already present in the database.")
