@@ -100,7 +100,7 @@ def send_custom_report(recipient_email: str):
         ro_summary = df_e.groupby(["ro_code", "ro_name", "district"]).agg(
             Total_Scans=("bill_number", "count"),
             Total_Sales_Value=("amount", "sum"),
-            Vouchers_Won=("claim_link", lambda x: x.notnull().sum()),
+            Vouchers_Won=("outcome", lambda x: (x.astype(str).str.lower() == "won").sum()),
             Unique_Customers=("phone_number", "nunique")
         ).reset_index().sort_values(by="Total_Scans", ascending=False)
     else:
@@ -400,8 +400,7 @@ if not filtered_df.empty:
         mask = (
             filtered_df["customer_name"].astype(str).str.contains(search_query, case=False, na=False) |
             filtered_df["phone_number"].astype(str).str.contains(search_query, case=False, na=False) |
-            filtered_df["bill_number"].astype(str).str.contains(search_query, case=False, na=False) |
-            filtered_df["claim_link"].astype(str).str.contains(search_query, case=False, na=False)
+            filtered_df["bill_number"].astype(str).str.contains(search_query, case=False, na=False)
         )
         filtered_df = filtered_df[mask]
 
@@ -487,11 +486,15 @@ with left_col:
     st.subheader("🏆 Performance Summary")
     if not filtered_df.empty:
         if is_admin_or_dev:
+            # Ensure ro_name is present and count winners using 'outcome'
+            if "ro_name" not in filtered_df.columns:
+                filtered_df["ro_name"] = filtered_df["ro_code"]
+
             outlet_agg = filtered_df.groupby(["ro_code", "ro_name"]).agg(
                 Scans=("bill_number", "count"),
                 Total_Sales=("amount", "sum"),
                 Avg_Bill=("amount", "mean"),
-                Winners=("claim_link", lambda x: x.notnull().sum())
+                Winners=("outcome", lambda x: (x.astype(str).str.lower() == "won").sum())
             ).reset_index().sort_values(by="Scans", ascending=False)
             st.dataframe(outlet_agg, use_container_width=True, hide_index=True)
         else:
