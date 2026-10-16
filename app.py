@@ -340,45 +340,68 @@ if submit_pressed:
             }
             st.rerun()
 
-        # 3. Check today's scan cadence for this RO (1st, 3rd, 5th... odd entries)
+        # 3. Winning Rule: 3rd, 13th, 23rd, 33rd... (Every 10 scans starting from scan 3)
         today_ro_scans = db.table("campaign_entries").select("id", count="exact")\
             .eq("ro_code", ro_code)\
             .gte("created_at", today_iso_start)\
             .execute()
 
         current_scan_number = (today_ro_scans.count or 0) + 1
-        is_cadence_winner = (current_scan_number % 2 == 1)
+        is_cadence_winner = (current_scan_number % 10 == 3)
 
         assigned_voucher = None
         is_winner = False
 
         if is_cadence_winner:
-            # 4. Check available quota from ro_daily_quota
-            quota_res = db.table("ro_daily_quota").select("*").eq("ro_code", ro_code).eq("quota_date", str(date.today())).execute()
+            # 4. Check available quota from ro_daily_quota (13 base + carry over)
+            quota_res = db.table("ro_daily_quota").select("*")\
+                .eq("ro_code", ro_code)\
+                .eq("quota_date", str(date.today()))\
+                .execute()
+
             has_quota = True
+            claimed_today = 0
+
             if quota_res.data:
                 q_row = quota_res.data[0]
-                total_avail = q_row.get("total_available", 16)
+                total_avail = q_row.get("total_available", 13)
                 claimed_today = q_row.get("claimed_count", 0)
                 if claimed_today >= total_avail:
                     has_quota = False
 
             if has_quota:
-                # 5. Fetch all available vouchers for this station (Random selection)
+                # 5. Exact pattern: 10 of ₹10, 2 of ₹20, 1 of ₹40
+                DAILY_PATTERN = [10, 10, 10, 20, 10, 10, 40, 10, 10, 20, 10, 10, 10]
+                winner_index = claimed_today % len(DAILY_PATTERN)
+                target_denomination = DAILY_PATTERN[winner_index]
+
+                # Fetch available voucher with target denomination (station-specific first, then unassigned pool)
                 v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                     .eq("ro_code", ro_code)\
+                    .eq("denomination", target_denomination)\
                     .ilike("status", "available")\
+                    .limit(1)\
                     .execute()
 
                 if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
+                        .is_("ro_code", "null")\
+                        .eq("denomination", target_denomination)\
                         .ilike("status", "available")\
+                        .limit(1)\
+                        .execute()
+
+                # Fallback to any available voucher if target denomination is temporarily out
+                if not v_res.data:
+                    v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
+                        .ilike("status", "available")\
+                        .limit(1)\
                         .execute()
 
                 if v_res.data:
-                    assigned_voucher = random.choice(v_res.data)
+                    assigned_voucher = v_res.data[0]
                     is_winner = True
-                    
+
                     db.table("voucher_vault").update({
                         "status": "Allocated",
                         "claimed_by_phone": mobile_no,
@@ -388,15 +411,14 @@ if submit_pressed:
 
                     if quota_res.data:
                         db.table("ro_daily_quota").update({
-                            "claimed_count": q_row.get("claimed_count", 0) + 1
+                            "claimed_count": claimed_today + 1
                         }).eq("id", q_row["id"]).execute()
 
-                    # Queue dialog trigger
                     st.session_state.pending_dialog = "WINNER"
                     st.session_state.winning_voucher_data = {
                         "id": assigned_voucher["id"],
                         "claim_link": assigned_voucher["claim_link"],
-                        "denomination": assigned_voucher.get("denomination", 40)
+                        "denomination": assigned_voucher.get("denomination", target_denomination)
                     }
 
         # 6. Insert Entry
