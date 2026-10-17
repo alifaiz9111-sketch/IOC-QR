@@ -33,3 +33,17 @@ RECIPIENT_EMAILS = [
 ]
 
 db = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def fetch_all_vouchers():
+    """Fetches all vouchers across all pages beyond Supabase's 1000 limit."""
+    all_vouchers = []
+    page_size = 1000
+    start = 0
+    while True:
+        res = db.table("voucher_vault").select("ro_code, denomination, status").range(start, start + page_size - 1).execute()
+        data = res.data or []
+        all_vouchers.extend(data)
+        if len(data) < page_size:
+            break
+        start += page_size
+    return all_vouchers

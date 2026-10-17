@@ -283,19 +283,72 @@ if st.session_state.user_role == "ro":
 st.divider()
 
 # ----------------- DATA LOADER -----------------
+def fetch_all_vault_vouchers(role: str, ro_code: str = None):
+    """Paginates beyond the 1,000 row default limit to fetch all vouchers."""
+    all_vouchers = []
+    page_size = 1000
+    start = 0
+    
+    while True:
+        query = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone")
+        if role not in ["admin", "dev"] and ro_code:
+            query = query.eq("ro_code", ro_code)
+            
+        res = query.range(start, start + page_size - 1).execute()
+        data = res.data or []
+        all_vouchers.extend(data)
+        
+        if len(data) < page_size:
+            break
+        start += page_size
+        
+    return all_vouchers
+
+@st.cache_data(ttl=15)
+def fetch_all_vault_vouchers(role: str, ro_code: str = None):
+    all_vouchers = []
+    page_size = 1000
+    start = 0
+    while True:
+        query = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone")
+        if role not in ["admin", "dev"] and ro_code:
+            query = query.eq("ro_code", ro_code)
+        res = query.range(start, start + page_size - 1).execute()
+        data = res.data or []
+        all_vouchers.extend(data)
+        if len(data) < page_size:
+            break
+        start += page_size
+    return all_vouchers
+
+@st.cache_data(ttl=15)
+def fetch_all_vault_vouchers(role: str, ro_code: str = None):
+    all_vouchers = []
+    page_size = 1000
+    start = 0
+    while True:
+        query = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone")
+        if role not in ["admin", "dev"] and ro_code:
+            query = query.eq("ro_code", ro_code)
+        res = query.range(start, start + page_size - 1).execute()
+        data = res.data or []
+        all_vouchers.extend(data)
+        if len(data) < page_size:
+            break
+        start += page_size
+    return all_vouchers
+
 @st.cache_data(ttl=15)
 def load_data(role: str, ro_code: str = None):
     outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, is_active").execute()
     if role in ["admin", "dev"]:
         entries_res = db.table("campaign_entries").select("*").order("created_at", desc=True).limit(5000).execute()
-        vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").execute()
     else:
         entries_res = db.table("campaign_entries").select("*").eq("ro_code", ro_code).order("created_at", desc=True).execute()
-        vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").eq("ro_code", ro_code).execute()
 
-    return entries_res.data, outlets_res.data, vouchers_res.data
+    vouchers_data = fetch_all_vault_vouchers(role, ro_code)
 
-entries, outlets, vouchers = load_data(st.session_state.user_role, st.session_state.ro_code)
+    return entries_res.data, outlets_res.data, vouchers_data
 
 df_entries = pd.DataFrame(entries) if entries else pd.DataFrame()
 df_outlets = pd.DataFrame(outlets) if outlets else pd.DataFrame()
