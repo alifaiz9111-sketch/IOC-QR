@@ -1,32 +1,54 @@
-name: Send Weekly Friday MIS Report
+name: Automated MIS Reports
 
 on:
   schedule:
-    # 5:30 PM IST every Friday (12:00 PM UTC)
-    - cron: '0 12 * * 5'
+    # 6:00 PM IST Daily (12:30 UTC)
+    - cron: '30 12 * * *'
+    # 7:00 PM IST Friday (13:30 UTC)
+    - cron: '30 13 * * 5'
   workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Report to generate'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
 
 jobs:
-  send-report:
+  dispatch_report:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install pandas openpyxl supabase
 
-      - name: Execute Weekly MIS Dispatcher
+      - name: Run Daily Report (6:00 PM IST)
+        if: github.event.schedule == '30 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'daily')
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
           SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
           SIR_REPORT_EMAIL: ${{ secrets.SIR_REPORT_EMAIL }}
-        run: python send_weekly_report.py
+        run: python send_reports.py --mode daily
+
+      - name: Run Weekly Report (7:00 PM IST Friday)
+        if: github.event.schedule == '30 13 * * 5' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'weekly')
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
+          SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
+          SIR_REPORT_EMAIL: ${{ secrets.SIR_REPORT_EMAIL }}
+        run: python send_reports.py --mode weekly
