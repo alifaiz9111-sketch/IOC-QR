@@ -1,0 +1,58 @@
+name: IOCL Scheduled MIS Reports
+
+on:
+  schedule:
+    # 6:00 PM IST Daily (12:30 UTC)
+    - cron: '30 12 * * *'
+    # 7:00 PM IST Friday (13:30 UTC)
+    - cron: '30 13 * * 5'
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Choose report to trigger manually'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
+
+jobs:
+  dispatch_report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install pandas openpyxl supabase
+
+      # 1. Daily Dispatch (6:00 PM IST or Manual Trigger)
+      - name: Run Daily MIS Dispatch
+        if: github.event.schedule == '30 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'daily')
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
+          SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+        run: python send_reports.py --mode daily
+
+      # 2. Weekly Dispatch (7:00 PM IST Friday or Manual Trigger)
+      - name: Run Weekly MIS Dispatch
+        if: github.event.schedule == '30 13 * * 5' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'weekly')
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
+          SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+        run: python send_reports.py --mode weekly
