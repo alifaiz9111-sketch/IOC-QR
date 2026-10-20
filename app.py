@@ -136,9 +136,10 @@ if not ro_code:
     st.error("⚠️ Invalid station link. Please scan the official QR code at the IndianOil fuel dispenser.")
     st.stop()
 
-@st.cache_data(ttl=60)
+```python
+# Real-time check directly from Supabase (no cache, 0-second delay)
 def get_station_details(code: str):
-    res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active").eq("ro_code", code).execute()
+    res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active").eq("ro_code", str(code).strip()).execute()
     return res.data[0] if res.data else None
 
 station = get_station_details(ro_code)
@@ -146,8 +147,35 @@ if not station:
     st.error(f"⚠️ Retail Outlet Code **{ro_code}** not recognized.")
     st.stop()
 
+# Real-time ban enforcement
 if not station.get("is_active", True):
-    st.warning("⚠️ The promotional campaign at this outlet is currently inactive.")
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #fff1f2;
+            border: 2px solid #f43f5e;
+            border-left: 6px solid #e11d48;
+            border-radius: 10px;
+            padding: 22px;
+            margin: 20px 0;
+            color: #881337;
+            font-family: inherit;
+            line-height: 1.6;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
+        ">
+            <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
+                🚫 Station Access Restricted
+            </h3>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #4c0519; font-weight: 500;">
+                Because of spamming, this Petrol Pump (<b>RO Code: {ro_code}</b>) is currently banned from participating in this campaign.
+            </p>
+            <p style="margin: 0; font-size: 13px; color: #9f1239;">
+                Entries and rewards submission for this outlet have been locked by Kolkata Divisional Office.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.stop()
 
 ro_name = station.get("ro_name", "IndianOil Outlet")
