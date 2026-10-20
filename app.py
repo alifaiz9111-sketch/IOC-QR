@@ -136,7 +136,7 @@ if not ro_code:
     st.error("⚠️ Invalid station link. Please scan the official QR code at the IndianOil fuel dispenser.")
     st.stop()
 
-```python
+
 # Real-time check directly from Supabase (no cache, 0-second delay)
 def get_station_details(code: str):
     res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active").eq("ro_code", str(code).strip()).execute()
