@@ -388,11 +388,35 @@ with st.sidebar:
     st.markdown("<p style='text-align: center; color: gray; margin-bottom: 20px;'>Retail Campaign Management Portal</p>", unsafe_allow_html=True)
 
 st.sidebar.header("🔍 Filters & Controls")
+
+# Calendar Date Picker (Single Date or Range of Dates)
+selected_dates = st.sidebar.date_input(
+    "📅 Select Date or Date Range",
+    value=(),
+    help="Pick a single date, or select two dates to filter by a range. Leave blank to show All-Time data."
+)
+
 if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
 filtered_df = df_entries.copy()
+
+# Apply Calendar Filter
+if not filtered_df.empty and selected_dates:
+    # Ensure entry timestamps have IST dates available for filtering
+    entry_dates = filtered_df["created_at"].dt.date
+    if isinstance(selected_dates, tuple) or isinstance(selected_dates, list):
+        if len(selected_dates) == 1:
+            # Single individual date selected
+            filtered_df = filtered_df[entry_dates == selected_dates[0]]
+        elif len(selected_dates) == 2:
+            # Group / range of dates selected (start to end)
+            start_date, end_date = selected_dates
+            filtered_df = filtered_df[(entry_dates >= start_date) & (entry_dates <= end_date)]
+    else:
+        filtered_df = filtered_df[entry_dates == selected_dates]
+
 search_query = st.sidebar.text_input("🔎 Search Bill / Customer / Phone", placeholder="Type keyword...").strip()
 
 if not filtered_df.empty:
