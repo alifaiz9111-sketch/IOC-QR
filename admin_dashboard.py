@@ -286,14 +286,30 @@ st.divider()
 @st.cache_data(ttl=15)
 def load_data(role: str, ro_code: str = None):
     outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, is_active").execute()
+    
+    # Fetch ALL campaign entries using pagination to bypass Supabase's 1000-row limit
+    all_entries = []
+    page_size = 1000
+    start = 0
+    while True:
+        query = db.table("campaign_entries").select("*").order("created_at", desc=True).range(start, start + page_size - 1)
+        if role not in ["admin", "dev"] and ro_code:
+            query = query.eq("ro_code", ro_code)
+        
+        batch = query.execute()
+        if not batch.data:
+            break
+        all_entries.extend(batch.data)
+        if len(batch.data) < page_size:
+            break
+        start += page_size
+
     if role in ["admin", "dev"]:
-        entries_res = db.table("campaign_entries").select("*").order("created_at", desc=True).limit(5000).execute()
         vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").execute()
     else:
-        entries_res = db.table("campaign_entries").select("*").eq("ro_code", ro_code).order("created_at", desc=True).execute()
         vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").eq("ro_code", ro_code).execute()
 
-    return entries_res.data, outlets_res.data, vouchers_res.data
+    return all_entries, outlets_res.data, vouchers_res.data
 
 entries, outlets, vouchers = load_data(st.session_state.user_role, st.session_state.ro_code)
 
