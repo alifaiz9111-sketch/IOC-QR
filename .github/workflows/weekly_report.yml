@@ -2,20 +2,9 @@ name: Automated MIS Reports
 
 on:
   schedule:
-    # 6:00 PM IST Daily (12:30 UTC)
-    - cron: '30 12 * * *'
-    # 7:00 PM IST Friday (13:30 UTC)
+    # 7:00 PM IST Every Friday (13:30 UTC)
     - cron: '30 13 * * 5'
   workflow_dispatch:
-    inputs:
-      report_type:
-        description: 'Report to generate'
-        required: true
-        default: 'daily'
-        type: choice
-        options:
-          - daily
-          - weekly
 
 jobs:
   dispatch_report:
@@ -33,18 +22,7 @@ jobs:
         run: |
           pip install pandas openpyxl supabase
 
-      - name: Run Daily Report (6:00 PM IST)
-        if: github.event.schedule == '30 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'daily')
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
-          SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
-          SIR_REPORT_EMAIL: ${{ secrets.SIR_REPORT_EMAIL }}
-        run: python send_reports.py --mode daily
-
       - name: Run Weekly Report (7:00 PM IST Friday)
-        if: github.event.schedule == '30 13 * * 5' || (github.event_name == 'workflow_dispatch' && inputs.report_type == 'weekly')
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}

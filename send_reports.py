@@ -18,11 +18,8 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 SMTP_SENDER_EMAIL = os.environ.get("SMTP_SENDER_EMAIL", "")
 SMTP_SENDER_PASSWORD = os.environ.get("SMTP_SENDER_PASSWORD", "")
 
-# Reads your existing SIR_REPORT_EMAIL secret, falls back to both recipients
-RECIPIENTS_RAW = os.environ.get(
-    "SIR_REPORT_EMAIL", "alifaiz9111@gmail.com, mehedihassan@indianoil.in"
-)
-RECIPIENT_EMAILS = [e.strip() for e in RECIPIENTS_RAW.split(",") if e.strip()]
+# Strict recipient list: sends only to these 2 designated email addresses
+RECIPIENT_EMAILS = ["alifaiz9111@gmail.com", "mehedihassan@indianoil.in"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -176,6 +173,6 @@ Adnet Campaign Operations Team
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--mode", choices=["daily", "weekly"], default="daily")
+  parser.add_argument("--mode", choices=["daily", "weekly"], default="weekly")
   args = parser.parse_args()
   generate_and_dispatch(args.mode)
