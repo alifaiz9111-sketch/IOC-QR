@@ -403,26 +403,33 @@ if submit_pressed:
                 winner_index = claimed_today % len(DAILY_PATTERN)
                 target_denomination = DAILY_PATTERN[winner_index]
 
-                # Fetch available voucher with target denomination (station-specific first, then unassigned pool)
+                # 1. Fetch available voucher with target denomination (station-specific first)
                 v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                     .eq("ro_code", ro_code)\
                     .eq("denomination", target_denomination)\
                     .ilike("status", "available")\
+                    .order("uploaded_at", desc=False)\
+                    .order("id", desc=False)\
                     .limit(1)\
                     .execute()
 
+                # 2. Then unassigned pool
                 if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .is_("ro_code", "null")\
                         .eq("denomination", target_denomination)\
                         .ilike("status", "available")\
+                        .order("uploaded_at", desc=False)\
+                        .order("id", desc=False)\
                         .limit(1)\
                         .execute()
 
-                # Fallback to any available voucher if target denomination is temporarily out
+                # 3. Fallback to any available voucher if target denomination is temporarily out
                 if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .ilike("status", "available")\
+                        .order("uploaded_at", desc=False)\
+                        .order("id", desc=False)\
                         .limit(1)\
                         .execute()
 
