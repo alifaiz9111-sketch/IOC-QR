@@ -558,6 +558,32 @@ with right_col:
     else:
         st.info("No fuel transaction records available.")
 
+    # KPI Card: Total Claimed + Allocated (Developer Dashboard Only)
+    if st.session_state.user_role == "dev":
+        st.write("")
+        if not df_vouchers.empty:
+            v_mask = df_vouchers["status"].isin(["Claimed", "Allocated", "Won"])
+            total_disbursed_amt = df_vouchers[v_mask]["denomination"].sum()
+            total_disbursed_count = len(df_vouchers[v_mask])
+            
+            claimed_amt = df_vouchers[df_vouchers["status"] == "Claimed"]["denomination"].sum()
+            allocated_amt = df_vouchers[df_vouchers["status"].isin(["Allocated", "Won"])]["denomination"].sum()
+
+            st.markdown("##### 💰 Voucher Value Disbursed (Allocated + Claimed)")
+            kpi_c1, kpi_c2 = st.columns(2)
+            kpi_c1.metric(
+                label="Total Value Disbursed",
+                value=f"₹{total_disbursed_amt:,.0f}",
+                help="Sum of all vouchers either Claimed or Allocated (Won)"
+            )
+            kpi_c2.metric(
+                label="Total Count",
+                value=f"{total_disbursed_count:,} Vouchers",
+                help=f"Claimed: ₹{claimed_amt:,.0f} | Allocated: ₹{allocated_amt:,.0f}"
+            )
+        else:
+            st.metric("Total Value Disbursed", "₹0")
+
 st.divider()
 
 # ----------------- 3. TRANSACTION AUDIT FEED -----------------
