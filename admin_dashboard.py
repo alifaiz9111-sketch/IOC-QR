@@ -304,18 +304,32 @@ def load_data(role: str, ro_code: str = None):
             break
         start += page_size
 
-    if role in ["admin", "dev"]:
-        vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").execute()
-    else:
-        vouchers_res = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").eq("ro_code", ro_code).execute()
+    all_vouchers = []
+    v_start = 0
+    v_page_size = 1000
+    while True:
+        v_query = db.table("voucher_vault").select("ro_code, denomination, status, claimed_by_phone").range(v_start, v_start + v_page_size - 1)
+        if role not in ["admin", "dev"] and ro_code:
+            v_query = v_query.eq("ro_code", ro_code)
+        
+        v_batch = v_query.execute()
+        if not v_batch.data:
+            break
+        all_vouchers.extend(v_batch.data)
+        if len(v_batch.data) < v_page_size:
+            break
+        v_start += v_page_size
 
-    return all_entries, outlets_res.data, vouchers_res.data
+    return all_entries, outlets_res.data, all_vouchers
 
 entries, outlets, vouchers = load_data(st.session_state.user_role, st.session_state.ro_code)
 
 df_entries = pd.DataFrame(entries) if entries else pd.DataFrame()
 df_outlets = pd.DataFrame(outlets) if outlets else pd.DataFrame()
 df_vouchers = pd.DataFrame(vouchers) if vouchers else pd.DataFrame()
+if not df_vouchers.empty:
+    df_vouchers["denomination"] = pd.to_numeric(df_vouchers["denomination"], errors="coerce").fillna(0)
+    df_vouchers["status_clean"] = df_vouchers["status"].astype(str).str.strip().str.title()
 
 if not df_entries.empty:
     df_entries["amount"] = pd.to_numeric(df_entries["amount"], errors="coerce").fillna(0.0)
@@ -562,24 +576,28 @@ with right_col:
     if st.session_state.user_role == "dev":
         st.write("")
         if not df_vouchers.empty:
-            v_mask = df_vouchers["status"].isin(["Claimed", "Allocated", "Won"])
-            total_disbursed_amt = df_vouchers[v_mask]["denomination"].sum()
-            total_disbursed_count = len(df_vouchers[v_mask])
+            # Match status case-insensitively
+            disbursed_df = df_vouchers[df_vouchers["status_clean"].isin(["Claimed", "Allocated", "Won"])]
+            total_disbursed_amt = disbursed_df["denomination"].sum()
+            total_disbursed_count = len(disbursed_df)
             
-            claimed_amt = df_vouchers[df_vouchers["status"] == "Claimed"]["denomination"].sum()
-            allocated_amt = df_vouchers[df_vouchers["status"].isin(["Allocated", "Won"])]["denomination"].sum()
+            claimed_df = df_vouchers[df_vouchers["status_clean"] == "Claimed"]
+            allocated_df = df_vouchers[df_vouchers["status_clean"].isin(["Allocated", "Won"])]
+            
+            claimed_amt = claimed_df["denomination"].sum()
+            allocated_amt = allocated_df["denomination"].sum()
 
             st.markdown("##### 💰 Voucher Value Disbursed (Allocated + Claimed)")
             kpi_c1, kpi_c2 = st.columns(2)
             kpi_c1.metric(
                 label="Total Value Disbursed",
                 value=f"₹{total_disbursed_amt:,.0f}",
-                help="Sum of all vouchers either Claimed or Allocated (Won)"
+                help=f"Claimed: ₹{claimed_amt:,.0f} | Allocated: ₹{allocated_amt:,.0f}"
             )
             kpi_c2.metric(
                 label="Total Count",
                 value=f"{total_disbursed_count:,} Vouchers",
-                help=f"Claimed: ₹{claimed_amt:,.0f} | Allocated: ₹{allocated_amt:,.0f}"
+                help=f"Claimed: {len(claimed_df)} | Allocated: {len(allocated_df)}"
             )
         else:
             st.metric("Total Value Disbursed", "₹0")
