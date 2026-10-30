@@ -399,7 +399,7 @@ if submit_pressed:
 
             if has_quota:
                 # 5. Exact pattern: 10 of ₹10, 2 of ₹20, 1 of ₹40
-                DAILY_PATTERN = [10, 10, 10, 20, 10, 10, 40, 10, 10, 20, 10, 10, 10]
+                DAILY_PATTERN = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
                 winner_index = claimed_today % len(DAILY_PATTERN)
                 target_denomination = DAILY_PATTERN[winner_index]
 
