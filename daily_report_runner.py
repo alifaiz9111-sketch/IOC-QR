@@ -46,6 +46,7 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
     (selected_date - 1 day at 5:30 PM IST) to (selected_date at 5:30 PM IST).
     """
     try:
+        # Determine target date
         if selected_date is None:
             target_d = datetime.now(IST).date()
         elif isinstance(selected_date, str):
@@ -62,12 +63,13 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
 
         date_display_str = target_d.strftime("%d-%b-%Y")
 
-        # Fetch records
+        # Explicitly SELECT all columns including created_at
         entries_res = (
             supabase.table("campaign_entries")
-            .select("*")
+            .select("id, ro_code, customer_name, phone_number, bill_number, fuel_grade, amount, outcome, created_at")
             .gte("created_at", start_utc_iso)
             .lte("created_at", end_utc_iso)
+            .order("created_at", desc=False)
             .execute()
         )
         outlets_res = (
@@ -81,20 +83,23 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
 
         # Process and aggregate data
         if not df_e.empty and not df_o.empty:
+            # 1. Clean Timestamp Conversion to IST
+            created_ts = pd.to_datetime(df_e["created_at"], errors="coerce", utc=True)
+            df_e["created_ts"] = created_ts
+            
+            # Sort explicitly in ascending order (earliest yesterday -> latest today)
+            df_e = df_e.sort_values(by="created_ts", ascending=True).reset_index(drop=True)
+
+            ist_ts = df_e["created_ts"] + timedelta(hours=5, minutes=30)
+            df_e["Scan_Date"] = ist_ts.dt.strftime("%d-%m-%Y")
+            df_e["Scan_Time"] = ist_ts.dt.strftime("%I:%M:%S %p")
+
+            # 2. Merge Outlet Information
             df_e["ro_code"] = df_e["ro_code"].astype(str)
             df_o["ro_code"] = df_o["ro_code"].astype(str)
             df_e = df_e.merge(df_o, on="ro_code", how="left")
 
-            # Parse timestamp and fill missing values with the report window anchor
-            parsed_dt = pd.to_datetime(df_e.get("created_at"), errors="coerce", utc=True)
-            default_fallback_dt = datetime(target_d.year, target_d.month, target_d.day, 12, 0, 0, tzinfo=timezone.utc)
-            parsed_dt = parsed_dt.fillna(default_fallback_dt)
-
-            df_e["created_at_ist"] = parsed_dt + timedelta(hours=5, minutes=30)
-            df_e["Scan_Date"] = df_e["created_at_ist"].dt.strftime("%d-%m-%Y")
-            df_e["Scan_Time"] = df_e["created_at_ist"].dt.strftime("%I:%M:%S %p")
-
-            # Daily summary: Unique_Customers removed
+            # 3. Summary sheet (without Unique_Customers)
             ro_summary = (
                 df_e.groupby(["ro_code", "ro_name", "district"])
                 .agg(
@@ -110,28 +115,27 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
                 "Status": [f"No scans recorded between {start_dt_ist.strftime('%d-%b-%Y %I:%M %p')} and {end_dt_ist.strftime('%d-%b-%Y %I:%M %p')} IST"]
             })
 
-        # Build Excel workbook (Vault_Inventory sheet omitted entirely)
+        # Build Excel workbook (Vault_Inventory sheet removed)
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             ro_summary.to_excel(writer, sheet_name=f"{report_type}_Summary", index=False)
             
             if not df_e.empty:
-                # Audit transactions: outcome column removed
+                # Audit Transactions sheet (outcome removed, ordered chronologically ascending)
                 audit_cols = [
-                    c for c in [
-                        "Scan_Date",
-                        "Scan_Time",
-                        "ro_code",
-                        "ro_name",
-                        "district",
-                        "customer_name",
-                        "phone_number",
-                        "bill_number",
-                        "fuel_grade",
-                        "amount",
-                    ] if c in df_e.columns
+                    "Scan_Date",
+                    "Scan_Time",
+                    "ro_code",
+                    "ro_name",
+                    "district",
+                    "customer_name",
+                    "phone_number",
+                    "bill_number",
+                    "fuel_grade",
+                    "amount",
                 ]
-                df_e[audit_cols].to_excel(writer, sheet_name="Audit_Transactions", index=False)
+                final_audit_cols = [c for c in audit_cols if c in df_e.columns]
+                df_e[final_audit_cols].to_excel(writer, sheet_name="Audit_Transactions", index=False)
 
         buffer.seek(0)
 
