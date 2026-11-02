@@ -1,8 +1,13 @@
-from supabase import create_client
+import pandas as pd
+from datetime import timedelta
 
-SUPABASE_URL = "https://atpvqeibzuzhhuowzbtk.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cHZxZWlienV6aGh1b3d6YnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNjc4NjEsImV4cCI6MjEwNjk0Mzg2MX0.yrw0p1S7moCcUoEMdvDSnmhlWPP076CNF57_QqeEIos"
+# Exact record from your database query
+record = {'customer_name': 'Ajay Garg', 'phone_number': '8233926165', 'created_at': '2026-11-01T12:44:57+00:00'}
+df = pd.DataFrame([record])
 
-sb = create_client(SUPABASE_URL, SUPABASE_KEY)
-res = sb.table("campaign_entries").select("id, customer_name, phone_number, created_at").eq("phone_number", "8233926165").execute()
-print(res.data)
+# New conversion logic
+ts = pd.to_datetime(df["created_at"], utc=True) + timedelta(hours=5, minutes=30)
+df["Scan_Date"] = ts.dt.strftime("%d-%m-%Y")
+df["Scan_Time"] = ts.dt.strftime("%I:%M:%S %p")
+
+print(df[["Scan_Date", "Scan_Time", "customer_name", "phone_number"]])

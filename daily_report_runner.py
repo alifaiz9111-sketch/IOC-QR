@@ -1,6 +1,7 @@
 import os
 import io
 import smtplib
+import traceback
 from datetime import datetime, timedelta, date, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -46,7 +47,7 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
     (selected_date - 1 day at 5:30 PM IST) to (selected_date at 5:30 PM IST).
     """
     try:
-        # Determine target date
+        # 1. Determine target date
         if selected_date is None:
             target_d = datetime.now(IST).date()
         elif isinstance(selected_date, str):
@@ -62,52 +63,57 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
         end_utc_iso = end_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
         date_display_str = target_d.strftime("%d-%b-%Y")
+        print(f"[{report_type} MIS] Querying window: {start_utc_iso}Z to {end_utc_iso}Z...")
 
-        # Explicitly SELECT all columns including created_at
+        # 2. Query Supabase
         entries_res = (
             supabase.table("campaign_entries")
-            .select("id, ro_code, customer_name, phone_number, bill_number, fuel_grade, amount, outcome, created_at")
+            .select("*")
             .gte("created_at", start_utc_iso)
             .lte("created_at", end_utc_iso)
-            .order("created_at", desc=False)
             .execute()
         )
         outlets_res = (
             supabase.table("retail_outlets")
-            .select("ro_code, ro_name, district, sales_area")
+            .select("ro_code, ro_name, district")
             .execute()
         )
 
-        df_e = pd.DataFrame(entries_res.data or [])
-        df_o = pd.DataFrame(outlets_res.data or [])
+        raw_entries = entries_res.data or []
+        raw_outlets = outlets_res.data or []
+        print(f"[{report_type} MIS] Retrieved {len(raw_entries)} entries and {len(raw_outlets)} outlets.")
 
-        # Process and aggregate data
-        if not df_e.empty and not df_o.empty:
-            # 1. Clean Timestamp Conversion to IST
-            created_ts = pd.to_datetime(df_e["created_at"], errors="coerce", utc=True)
-            df_e["created_ts"] = created_ts
+        df_e = pd.DataFrame(raw_entries)
+        df_o = pd.DataFrame(raw_outlets)
+
+        # 3. Process records
+        if not df_e.empty:
+            # Parse created_at timestamps
+            df_e["utc_dt"] = pd.to_datetime(df_e["created_at"], errors="coerce", utc=True)
             
-            # Sort explicitly in ascending order (earliest yesterday -> latest today)
-            df_e = df_e.sort_values(by="created_ts", ascending=True).reset_index(drop=True)
+            # Sort chronologically ascending (earliest yesterday -> latest today)
+            df_e = df_e.sort_values(by="utc_dt", ascending=True).reset_index(drop=True)
 
-            ist_ts = df_e["created_ts"] + timedelta(hours=5, minutes=30)
-            df_e["Scan_Date"] = ist_ts.dt.strftime("%d-%m-%Y")
-            df_e["Scan_Time"] = ist_ts.dt.strftime("%I:%M:%S %p")
+            # Convert to IST (+5:30)
+            df_e["ist_dt"] = df_e["utc_dt"] + timedelta(hours=5, minutes=30)
+            df_e["Scan_Date"] = df_e["ist_dt"].dt.strftime("%d-%m-%Y")
+            df_e["Scan_Time"] = df_e["ist_dt"].dt.strftime("%I:%M:%S %p")
 
-            # 2. Merge Outlet Information
-            df_e["ro_code"] = df_e["ro_code"].astype(str)
-            df_o["ro_code"] = df_o["ro_code"].astype(str)
-            df_e = df_e.merge(df_o, on="ro_code", how="left")
+            # Merge Outlet Information
+            if not df_o.empty:
+                df_e["ro_code"] = df_e["ro_code"].astype(str).str.strip()
+                df_o["ro_code"] = df_o["ro_code"].astype(str).str.strip()
+                df_o = df_o.drop_duplicates(subset=["ro_code"])
+                df_e = df_e.merge(df_o, on="ro_code", how="left")
 
-            # 3. Summary sheet (without Unique_Customers)
+            # Daily Summary (Without Unique_Customers)
             ro_summary = (
-                df_e.groupby(["ro_code", "ro_name", "district"])
+                df_e.groupby(["ro_code", "ro_name", "district"], as_index=False)
                 .agg(
                     Total_Scans=("bill_number", "count"),
                     Total_Sales_Value=("amount", "sum"),
                     Winners=("outcome", lambda x: (x.astype(str).str.lower() == "won").sum()),
                 )
-                .reset_index()
                 .sort_values(by="Total_Scans", ascending=False)
             )
         else:
@@ -115,14 +121,15 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
                 "Status": [f"No scans recorded between {start_dt_ist.strftime('%d-%b-%Y %I:%M %p')} and {end_dt_ist.strftime('%d-%b-%Y %I:%M %p')} IST"]
             })
 
-        # Build Excel workbook (Vault_Inventory sheet removed)
+        # 4. Generate Excel in memory
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            # Sheet 1: Summary (Unique_Customers excluded)
             ro_summary.to_excel(writer, sheet_name=f"{report_type}_Summary", index=False)
             
+            # Sheet 2: Audit Transactions (Chronological ascending, outcome excluded, Vault_Inventory omitted)
             if not df_e.empty:
-                # Audit Transactions sheet (outcome removed, ordered chronologically ascending)
-                audit_cols = [
+                candidate_cols = [
                     "Scan_Date",
                     "Scan_Time",
                     "ro_code",
@@ -134,18 +141,18 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
                     "fuel_grade",
                     "amount",
                 ]
-                final_audit_cols = [c for c in audit_cols if c in df_e.columns]
-                df_e[final_audit_cols].to_excel(writer, sheet_name="Audit_Transactions", index=False)
+                final_cols = [col for col in candidate_cols if col in df_e.columns]
+                df_e[final_cols].to_excel(writer, sheet_name="Audit_Transactions", index=False)
 
         buffer.seek(0)
 
-        # Recipient parsing
+        # 5. Determine recipients
         if recipient_email:
-            targets = [e.strip() for e in recipient_email.split(",") if e.strip()]
+            targets = [e.strip() for e in str(recipient_email).split(",") if e.strip()]
         else:
             targets = DEFAULT_RECIPIENT_EMAILS
 
-        # Compose Email
+        # 6. Compose email
         email_subject = f"IOCL Kolkata DO - {report_type} Campaign MIS Report ({date_display_str})"
         email_body = f"""Dear Sir,
 
@@ -173,17 +180,22 @@ Adnet Advertising Campaign Operations Team
         )
         msg.attach(part)
 
+        print(f"[{report_type} MIS] Connecting to SMTP server...")
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(SMTP_SENDER_EMAIL, SMTP_SENDER_PASSWORD)
             server.sendmail(SMTP_SENDER_EMAIL, targets, msg.as_string())
 
-        return True, f"Successfully sent {report_type} report for {date_display_str} to {', '.join(targets)}!"
+        success_msg = f"Successfully dispatched {report_type} report for {date_display_str} to {', '.join(targets)}!"
+        print(f"[{report_type} MIS] ✅ {success_msg}")
+        return True, success_msg
 
     except Exception as e:
+        err_details = traceback.format_exc()
+        print(f"[{report_type} MIS ERROR]\n{err_details}")
         return False, f"Failed to send email: {str(e)}"
 
 
 if __name__ == "__main__":
     success, msg = send_campaign_report(report_type="Daily")
-    print(msg)
+    print("Execution Result:", msg)
