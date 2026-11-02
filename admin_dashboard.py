@@ -346,7 +346,11 @@ if not df_entries.empty:
 # ----------------- DEVELOPER CONTROL PANEL -----------------
 if st.session_state.user_role == "dev":
     with st.expander("⚙️ Developer Controls: RO Activation & Live Voucher Vault", expanded=True):
-        dev_tab1, dev_tab2 = st.tabs(["🚦 Turn ROs Active / Inactive", "🎟️ Live Voucher Vault Inventory"])
+        dev_tab1, dev_tab2, dev_tab3 = st.tabs([
+            "🚦 Turn ROs Active / Inactive", 
+            "🎟️ Live Voucher Vault Inventory",
+            "📨 Manual MIS Dispatcher"
+        ])
 
         with dev_tab1:
             st.markdown("##### Outlet Campaign Status")
@@ -403,6 +407,43 @@ if st.session_state.user_role == "dev":
                 st.markdown("###### Customers Who Won but Haven't Claimed (For Manual Outreach)")
                 unclaimed_winners = df_vouchers[df_vouchers["status"] == "Won"][["ro_code", "denomination", "claimed_by_phone"]].dropna()
                 st.dataframe(unclaimed_winners, use_container_width=True, hide_index=True)
+
+        with dev_tab3:
+            st.markdown("##### 📨 Manual Campaign MIS Report Dispatcher")
+            st.caption("Sends records from **Day Before 5:30 PM IST** to **Selected Date 5:30 PM IST**.")
+
+            from datetime import date
+            from daily_report_runner import send_campaign_report
+
+            col_d1, col_d2 = st.columns([1, 2])
+            with col_d1:
+                manual_date = st.date_input(
+                    "Select Date *",
+                    value=date.today(),
+                    key="dev_manual_report_date"
+                )
+            with col_d2:
+                manual_recipient = st.text_input(
+                    "Recipient Email Address *",
+                    value="mehedihassan@indianoil.in",
+                    placeholder="Enter email address (comma-separated for multiple)",
+                    key="dev_manual_report_email"
+                ).strip()
+
+            if st.button("🚀 Send Daily MIS Report", type="primary", use_container_width=True, key="btn_send_dev_manual_report"):
+                if not manual_recipient:
+                    st.error("Please enter a valid recipient email address.")
+                else:
+                    with st.spinner(f"Compiling MIS report for {manual_date} and dispatching..."):
+                        ok, msg = send_campaign_report(
+                            selected_date=manual_date,
+                            recipient_email=manual_recipient,
+                            report_type="Daily"
+                        )
+                        if ok:
+                            st.success(msg)
+                        else:
+                            st.error(msg)
 
     st.divider()
 
