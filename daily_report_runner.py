@@ -2,8 +2,6 @@ import os
 import io
 import smtplib
 from datetime import datetime, timedelta, date, timezone
-from zoneinfo import ZoneInfo
-IST = ZoneInfo("Asia/Kolkata")
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -11,7 +9,8 @@ from email import encoders
 import pandas as pd
 from supabase import create_client
 
-IST = pytz.timezone("Asia/Kolkata")
+# Indian Standard Time (UTC+05:30) using built-in timezone
+IST = timezone(timedelta(hours=5, minutes=30))
 
 def get_config(key: str, default: str = ""):
     val = os.environ.get(key)
@@ -56,9 +55,10 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
             target_d = selected_date
 
         # Window: Yesterday 5:30 PM IST to Selected Date 5:30 PM IST
-        end_dt_ist = IST.localize(datetime.combine(target_d, datetime.min.time())).replace(hour=17, minute=30, second=0)
+        end_dt_ist = datetime(target_d.year, target_d.month, target_d.day, 17, 30, 0, tzinfo=IST)
         start_dt_ist = end_dt_ist - timedelta(days=1)
 
+        # Convert to UTC ISO format for Supabase querying
         start_utc_iso = start_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         end_utc_iso = end_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -93,9 +93,9 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
             df_o["ro_code"] = df_o["ro_code"].astype(str)
             df_e = df_e.merge(df_o, on="ro_code", how="left")
 
+            # Convert created_at to IST using 5.5 hour offset
             df_e["created_at_ist"] = (
-                pd.to_datetime(df_e["created_at"], errors="coerce", utc=True)
-                .dt.tz_convert("Asia/Kolkata")
+                pd.to_datetime(df_e["created_at"], errors="coerce", utc=True) + timedelta(hours=5, minutes=30)
             )
             df_e["Scan_Date"] = df_e["created_at_ist"].dt.strftime("%d-%m-%Y")
             df_e["Scan_Time"] = df_e["created_at_ist"].dt.strftime("%I:%M:%S %p")
@@ -191,6 +191,5 @@ Adnet Advertising Campaign Operations Team
 
 
 if __name__ == "__main__":
-    # Standard automated run for today
     success, msg = send_campaign_report(report_type="Daily")
     print(msg)
