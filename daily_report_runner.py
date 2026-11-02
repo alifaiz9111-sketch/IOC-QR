@@ -9,7 +9,7 @@ from email import encoders
 import pandas as pd
 from supabase import create_client
 
-# Indian Standard Time (UTC+05:30) using built-in timezone
+# Indian Standard Time (UTC+05:30)
 IST = timezone(timedelta(hours=5, minutes=30))
 
 def get_config(key: str, default: str = ""):
@@ -42,11 +42,10 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def send_campaign_report(selected_date=None, recipient_email=None, report_type="Daily"):
     """
-    Sends the MIS report for a window:
+    Sends the MIS report for window:
     (selected_date - 1 day at 5:30 PM IST) to (selected_date at 5:30 PM IST).
     """
     try:
-        # Determine target date
         if selected_date is None:
             target_d = datetime.now(IST).date()
         elif isinstance(selected_date, str):
@@ -58,7 +57,6 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
         end_dt_ist = datetime(target_d.year, target_d.month, target_d.day, 17, 30, 0, tzinfo=IST)
         start_dt_ist = end_dt_ist - timedelta(days=1)
 
-        # Convert to UTC ISO format for Supabase querying
         start_utc_iso = start_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         end_utc_iso = end_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -77,15 +75,9 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
             .select("ro_code, ro_name, district, sales_area")
             .execute()
         )
-        vouchers_res = (
-            supabase.table("voucher_vault")
-            .select("ro_code, denomination, status")
-            .execute()
-        )
 
         df_e = pd.DataFrame(entries_res.data or [])
         df_o = pd.DataFrame(outlets_res.data or [])
-        df_v = pd.DataFrame(vouchers_res.data or [])
 
         # Process and aggregate data
         if not df_e.empty and not df_o.empty:
@@ -93,39 +85,38 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
             df_o["ro_code"] = df_o["ro_code"].astype(str)
             df_e = df_e.merge(df_o, on="ro_code", how="left")
 
-            # Convert created_at to IST using 5.5 hour offset
-            df_e["created_at_ist"] = (
-                pd.to_datetime(df_e["created_at"], errors="coerce", utc=True) + timedelta(hours=5, minutes=30)
-            )
+            # Parse timestamp and fill missing values with the report window anchor
+            parsed_dt = pd.to_datetime(df_e.get("created_at"), errors="coerce", utc=True)
+            default_fallback_dt = datetime(target_d.year, target_d.month, target_d.day, 12, 0, 0, tzinfo=timezone.utc)
+            parsed_dt = parsed_dt.fillna(default_fallback_dt)
+
+            df_e["created_at_ist"] = parsed_dt + timedelta(hours=5, minutes=30)
             df_e["Scan_Date"] = df_e["created_at_ist"].dt.strftime("%d-%m-%Y")
             df_e["Scan_Time"] = df_e["created_at_ist"].dt.strftime("%I:%M:%S %p")
 
+            # Daily summary: Unique_Customers removed
             ro_summary = (
                 df_e.groupby(["ro_code", "ro_name", "district"])
                 .agg(
                     Total_Scans=("bill_number", "count"),
                     Total_Sales_Value=("amount", "sum"),
                     Winners=("outcome", lambda x: (x.astype(str).str.lower() == "won").sum()),
-                    Unique_Customers=("phone_number", "nunique"),
                 )
                 .reset_index()
                 .sort_values(by="Total_Scans", ascending=False)
             )
         else:
-            ro_summary = pd.DataFrame({"Status": [f"No scans recorded between {start_dt_ist.strftime('%d-%b-%Y %I:%M %p')} and {end_dt_ist.strftime('%d-%b-%Y %I:%M %p')} IST"]})
+            ro_summary = pd.DataFrame({
+                "Status": [f"No scans recorded between {start_dt_ist.strftime('%d-%b-%Y %I:%M %p')} and {end_dt_ist.strftime('%d-%b-%Y %I:%M %p')} IST"]
+            })
 
-        vault_summary = (
-            df_v.groupby(["denomination", "status"]).size().unstack(fill_value=0)
-            if not df_v.empty
-            else pd.DataFrame()
-        )
-
-        # Build Excel
+        # Build Excel workbook (Vault_Inventory sheet omitted entirely)
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             ro_summary.to_excel(writer, sheet_name=f"{report_type}_Summary", index=False)
-            vault_summary.to_excel(writer, sheet_name="Vault_Inventory")
+            
             if not df_e.empty:
+                # Audit transactions: outcome column removed
                 audit_cols = [
                     c for c in [
                         "Scan_Date",
@@ -138,7 +129,6 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
                         "bill_number",
                         "fuel_grade",
                         "amount",
-                        "outcome",
                     ] if c in df_e.columns
                 ]
                 df_e[audit_cols].to_excel(writer, sheet_name="Audit_Transactions", index=False)
@@ -151,7 +141,7 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
         else:
             targets = DEFAULT_RECIPIENT_EMAILS
 
-        # Email Subject & Body exactly per specification
+        # Compose Email
         email_subject = f"IOCL Kolkata DO - {report_type} Campaign MIS Report ({date_display_str})"
         email_body = f"""Dear Sir,
 
