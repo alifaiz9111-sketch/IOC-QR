@@ -1,8 +1,9 @@
 import os
 import io
 import smtplib
-from datetime import datetime, timedelta, date
-import pytz
+from datetime import datetime, timedelta, date, timezone
+from zoneinfo import ZoneInfo
+IST = ZoneInfo("Asia/Kolkata")
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -58,8 +59,8 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
         end_dt_ist = IST.localize(datetime.combine(target_d, datetime.min.time())).replace(hour=17, minute=30, second=0)
         start_dt_ist = end_dt_ist - timedelta(days=1)
 
-        start_utc_iso = start_dt_ist.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        end_utc_iso = end_dt_ist.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        start_utc_iso = start_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        end_utc_iso = end_dt_ist.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
         date_display_str = target_d.strftime("%d-%b-%Y")
 
