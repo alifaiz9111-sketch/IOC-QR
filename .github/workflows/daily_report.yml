@@ -1,0 +1,32 @@
+name: Daily Campaign MIS Report
+
+on:
+  schedule:
+    # 6:00 PM IST is 12:30 PM UTC (30 12 * * *)
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  send-daily-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas openpyxl supabase pytz
+
+      - name: Run Daily Report Dispatcher
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
+          SMTP_SENDER_PASSWORD: ${{ secrets.SMTP_SENDER_PASSWORD }}
+          SIR_REPORT_EMAIL: ${{ secrets.SIR_REPORT_EMAIL }}
+        run: python daily_report_runner.py
