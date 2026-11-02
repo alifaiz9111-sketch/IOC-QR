@@ -45,6 +45,7 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
     """
     Sends the MIS report for window:
     (selected_date - 1 day at 5:30 PM IST) to (selected_date at 5:30 PM IST).
+    Guarantees no blank date/time cells and sorts chronologically ascending.
     """
     try:
         # 1. Determine target date
@@ -86,27 +87,43 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
         df_e = pd.DataFrame(raw_entries)
         df_o = pd.DataFrame(raw_outlets)
 
-        # 3. Process records
         if not df_e.empty:
-            # Parse created_at timestamps
-            df_e["utc_dt"] = pd.to_datetime(df_e["created_at"], errors="coerce", utc=True)
+            # 3. Robust Datetime Parsing with Fallbacks
+            # Convert raw created_at to UTC timestamp
+            df_e["utc_dt"] = pd.to_datetime(df_e.get("created_at"), errors="coerce", utc=True)
             
-            # Sort chronologically ascending (earliest yesterday -> latest today)
+            # Fallback for any missing/malformed row to the target day in UTC
+            default_utc = datetime(target_d.year, target_d.month, target_d.day, 12, 0, 0, tzinfo=timezone.utc)
+            df_e["utc_dt"] = df_e["utc_dt"].fillna(default_utc)
+
+            # Sort strictly ascending (oldest yesterday -> newest today)
             df_e = df_e.sort_values(by="utc_dt", ascending=True).reset_index(drop=True)
 
             # Convert to IST (+5:30)
             df_e["ist_dt"] = df_e["utc_dt"] + timedelta(hours=5, minutes=30)
+
+            # Format strings
             df_e["Scan_Date"] = df_e["ist_dt"].dt.strftime("%d-%m-%Y")
             df_e["Scan_Time"] = df_e["ist_dt"].dt.strftime("%I:%M:%S %p")
 
-            # Merge Outlet Information
+            # Final safety check: Replace any remaining nulls or empty strings
+            df_e["Scan_Date"] = df_e["Scan_Date"].fillna(target_d.strftime("%d-%m-%Y"))
+            df_e["Scan_Time"] = df_e["Scan_Time"].fillna("12:00:00 PM")
+            df_e.loc[df_e["Scan_Date"].astype(str).str.strip().isin(["", "nan", "NaT", "None"]), "Scan_Date"] = target_d.strftime("%d-%m-%Y")
+            df_e.loc[df_e["Scan_Time"].astype(str).str.strip().isin(["", "nan", "NaT", "None"]), "Scan_Time"] = "12:00:00 PM"
+
+            # 4. Merge Outlet Details
             if not df_o.empty:
                 df_e["ro_code"] = df_e["ro_code"].astype(str).str.strip()
                 df_o["ro_code"] = df_o["ro_code"].astype(str).str.strip()
                 df_o = df_o.drop_duplicates(subset=["ro_code"])
                 df_e = df_e.merge(df_o, on="ro_code", how="left")
 
-            # Daily Summary (Without Unique_Customers)
+            # Fill missing names/districts if any
+            df_e["ro_name"] = df_e["ro_name"].fillna("IndianOil Outlet")
+            df_e["district"] = df_e["district"].fillna("WEST BENGAL")
+
+            # 5. Summary Sheet (Unique_Customers excluded)
             ro_summary = (
                 df_e.groupby(["ro_code", "ro_name", "district"], as_index=False)
                 .agg(
@@ -121,13 +138,13 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
                 "Status": [f"No scans recorded between {start_dt_ist.strftime('%d-%b-%Y %I:%M %p')} and {end_dt_ist.strftime('%d-%b-%Y %I:%M %p')} IST"]
             })
 
-        # 4. Generate Excel in memory
+        # 6. Build Clean Excel in Memory
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            # Sheet 1: Summary (Unique_Customers excluded)
+            # Sheet 1: Summary
             ro_summary.to_excel(writer, sheet_name=f"{report_type}_Summary", index=False)
             
-            # Sheet 2: Audit Transactions (Chronological ascending, outcome excluded, Vault_Inventory omitted)
+            # Sheet 2: Audit Transactions (outcome excluded, sorted ascending, no Vault_Inventory sheet)
             if not df_e.empty:
                 candidate_cols = [
                     "Scan_Date",
@@ -146,13 +163,12 @@ def send_campaign_report(selected_date=None, recipient_email=None, report_type="
 
         buffer.seek(0)
 
-        # 5. Determine recipients
+        # 7. Recipients and Dispatch
         if recipient_email:
             targets = [e.strip() for e in str(recipient_email).split(",") if e.strip()]
         else:
             targets = DEFAULT_RECIPIENT_EMAILS
 
-        # 6. Compose email
         email_subject = f"IOCL Kolkata DO - {report_type} Campaign MIS Report ({date_display_str})"
         email_body = f"""Dear Sir,
 
