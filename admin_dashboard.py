@@ -664,11 +664,19 @@ if not filtered_df.empty:
     sort_col, is_asc = audit_sort_options[chosen_sort]
     sorted_feed = filtered_df.sort_values(by=sort_col, ascending=is_asc)
 
-    display_cols = [
-        "Date", "Time", "ro_code", "ro_name", 
-        "customer_name", "phone_number", "bill_number", 
-        "fuel_grade", "amount", "outcome", "claim_link"
-    ]
+    if st.session_state.user_role == "admin":
+        display_cols = [
+            "Date", "Time", "ro_code", "ro_name", 
+            "customer_name", "phone_number", "bill_number", 
+            "fuel_grade", "amount"
+        ]
+    else:
+        display_cols = [
+            "Date", "Time", "ro_code", "ro_name", 
+            "customer_name", "phone_number", "bill_number", 
+            "fuel_grade", "amount", "outcome", "claim_link"
+        ]
+
     available_cols = [c for c in display_cols if c in sorted_feed.columns]
 
     num_rows = len(sorted_feed) if chosen_limit == "All Rows" else int(chosen_limit.replace(" Rows", ""))
