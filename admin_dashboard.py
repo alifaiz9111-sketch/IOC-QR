@@ -659,7 +659,12 @@ if not filtered_df.empty:
     }
 
     chosen_sort = ctrl_col1.selectbox("Sort Transactions", list(audit_sort_options.keys()), index=0)
-    chosen_limit = ctrl_col2.selectbox("Display Limit", ["25 Rows", "50 Rows", "100 Rows", "All Rows"], index=0)
+    if st.session_state.user_role == "dev":
+        limit_options = ["25 Rows", "50 Rows", "100 Rows", "All Rows"]
+    else:
+        limit_options = ["25 Rows", "50 Rows", "100 Rows"]
+
+    chosen_limit = ctrl_col2.selectbox("Display Limit", limit_options, index=0)
 
     sort_col, is_asc = audit_sort_options[chosen_sort]
     sorted_feed = filtered_df.sort_values(by=sort_col, ascending=is_asc)
