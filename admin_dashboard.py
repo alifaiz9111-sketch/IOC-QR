@@ -285,7 +285,8 @@ st.divider()
 # ----------------- DATA LOADER -----------------
 @st.cache_data(ttl=15)
 def load_data(role: str, ro_code: str = None):
-    outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, is_active").execute()
+    # Retrieve check_5580 alongside outlet details
+    outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, is_active, check_5580").execute()
     
     # Fetch ALL campaign entries using pagination to bypass Supabase's 1000-row limit
     all_entries = []
@@ -356,7 +357,9 @@ if st.session_state.user_role == "dev":
             st.markdown("##### Outlet Campaign Status")
             st.caption("Toggle the checkbox to activate/deactivate an outlet.")
             if not df_outlets.empty:
-                ro_display = df_outlets[["ro_code", "ro_name", "district", "is_active"]].copy()
+                # Include check_5580 mapped as Total Sum
+                ro_display = df_outlets[["ro_code", "ro_name", "district", "check_5580", "is_active"]].copy()
+                ro_display["check_5580"] = pd.to_numeric(ro_display["check_5580"], errors="coerce").fillna(0).astype(int)
                 ro_display["is_active"] = ro_display["is_active"].fillna(True).astype(bool)
 
                 edited_ro = st.data_editor(
@@ -365,6 +368,12 @@ if st.session_state.user_role == "dev":
                         "ro_code": st.column_config.TextColumn("RO Code", disabled=True),
                         "ro_name": st.column_config.TextColumn("RO Name", disabled=True),
                         "district": st.column_config.TextColumn("District", disabled=True),
+                        "check_5580": st.column_config.NumberColumn(
+                            "Total Sum", 
+                            help="Cumulative disbursed amount tracked against ₹5,580",
+                            format="₹%d",
+                            disabled=True
+                        ),
                         "is_active": st.column_config.CheckboxColumn("Active in Campaign?", default=True)
                     },
                     hide_index=True,
