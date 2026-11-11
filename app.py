@@ -139,7 +139,7 @@ if not ro_code:
 
 # Real-time check directly from Supabase (no cache, 0-second delay)
 def get_station_details(code: str):
-    res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active").eq("ro_code", str(code).strip()).execute()
+    res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active, check_5580").eq("ro_code", str(code).strip()).execute()
     return res.data[0] if res.data else None
 
 station = get_station_details(ro_code)
@@ -377,10 +377,17 @@ if submit_pressed:
         current_scan_number = (today_ro_scans.count or 0) + 1
         is_cadence_winner = (current_scan_number % 10 == 0)
 
+        # 5580 Category & Rule Check (Starts from 10-11-2026)
+        CAMPAIGN_RULE_START_DATE = date(2026, 11, 10)
+        is_rule_active = (date.today() >= CAMPAIGN_RULE_START_DATE)
+
+        current_check_val = station.get("check_5580") or 0
+        is_category_a = (current_check_val >= 5580)
+
         assigned_voucher = None
         is_winner = False
 
-        if is_cadence_winner:
+        if is_cadence_winner and not is_category_a:
             # 4. Check available quota from ro_daily_quota (13 base + carry over)
             quota_res = db.table("ro_daily_quota").select("*")\
                 .eq("ro_code", ro_code)\
@@ -435,6 +442,7 @@ if submit_pressed:
 
                 if v_res.data:
                     assigned_voucher = v_res.data[0]
+                    won_denom = assigned_voucher.get("denomination", target_denomination)
                     is_winner = True
 
                     db.table("voucher_vault").update({
@@ -449,11 +457,18 @@ if submit_pressed:
                             "claimed_count": claimed_today + 1
                         }).eq("id", q_row["id"]).execute()
 
+                    # Add voucher denomination to check_5580 from 10-11-2026 onwards
+                    if is_rule_active:
+                        new_check_val = current_check_val + won_denom
+                        db.table("retail_outlets").update({
+                            "check_5580": new_check_val
+                        }).eq("ro_code", ro_code).execute()
+
                     st.session_state.pending_dialog = "WINNER"
                     st.session_state.winning_voucher_data = {
                         "id": assigned_voucher["id"],
                         "claim_link": assigned_voucher["claim_link"],
-                        "denomination": assigned_voucher.get("denomination", target_denomination)
+                        "denomination": won_denom
                     }
 
         # 6. Insert Entry
