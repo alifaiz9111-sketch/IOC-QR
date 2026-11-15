@@ -153,12 +153,12 @@ if not station.get("is_active", True):
         f"""
         <div style="
             background-color: #fff1f2;
-            border: 2px solid #f37022;
+            border: 3px solid #f37022;
             border-left: 6px solid #f37022;
             border-radius: 10px;
             padding: 22px;
             margin: 20px 0;
-            color: #881337;
+            color: #02164f;
             font-family: inherit;
             line-height: 1.6;
             box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
