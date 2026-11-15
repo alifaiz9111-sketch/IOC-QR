@@ -151,7 +151,7 @@ if not station:
 if not station.get("is_active", True):
     st.markdown(
         f"""
-        <div style="text-align: center;"
+        <div style="
             background-color: #fff1f2;
             border: 2px solid #f43f5e;
             border-left: 6px solid #e11d48;
@@ -163,9 +163,12 @@ if not station.get("is_active", True):
             line-height: 1.6;
             box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
         ">
-            <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
-                Thank you for being a part of this campaign. The campaign has ended, and we appreciate your participation.
-            </h3>
+            <div style="text-align: center;">
+                <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
+                    Thank you for being a part of this campaign. The campaign has ended, and we appreciate your participation.
+                </h3>
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
