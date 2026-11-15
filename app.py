@@ -164,7 +164,7 @@ if not station.get("is_active", True):
             box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
         ">
             <div style="text-align: center;">
-                <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
+                <h3 style="margin: 0 0 10px 0; color: #02164f; font-size: 19px;">
                     Thank you for being a part of this campaign. <br> The campaign has ended, and we appreciate your participation.
                 </h3>
             </div>
