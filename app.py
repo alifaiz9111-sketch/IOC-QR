@@ -164,13 +164,12 @@ if not station.get("is_active", True):
             box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
         ">
             <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
-                🚫 Station Access Restricted
+                Thank you for being a part of this campaign. The campaign has ended, and we appreciate your participation.            </p>
+
             </h3>
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #4c0519; font-weight: 500;">
                 Thank you for being a part of this campaign. The campaign has ended, and we appreciate your participation.            </p>
-            <p style="margin: 0; font-size: 13px; color: #9f1239;">
-                Entries and rewards submission for this outlet have been locked by Kolkata Divisional Office.
-            </p>
+            
         </div>
         """,
         unsafe_allow_html=True
