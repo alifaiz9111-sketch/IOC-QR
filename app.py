@@ -151,7 +151,7 @@ if not station:
 if not station.get("is_active", True):
     st.markdown(
         f"""
-        <div style="
+        <div style="text-align: center;"
             background-color: #fff1f2;
             border: 2px solid #f43f5e;
             border-left: 6px solid #e11d48;
