@@ -154,7 +154,7 @@ if not station.get("is_active", True):
         <div style="
             background-color: #fff1f2;
             border: 2px solid #f43f5e;
-            border-left: 6px solid #e11d48;
+            border-left: 6px solid #f37022;
             border-radius: 10px;
             padding: 22px;
             margin: 20px 0;
