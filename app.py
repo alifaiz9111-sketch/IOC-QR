@@ -165,7 +165,7 @@ if not station.get("is_active", True):
         ">
             <div style="text-align: center;">
                 <h3 style="margin: 0 0 10px 0; color: #be123c; font-size: 19px;">
-                    Thank you for being a part of this campaign. <br> <br> The campaign has ended, and we appreciate your participation.
+                    Thank you for being a part of this campaign. <br> The campaign has ended, and we appreciate your participation.
                 </h3>
             </div>
 
