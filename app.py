@@ -167,8 +167,7 @@ if not station.get("is_active", True):
                 🚫 Station Access Restricted
             </h3>
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #4c0519; font-weight: 500;">
-                Because of spamming, this Petrol Pump (<b>RO Code: {ro_code}</b>) is currently banned from participating in this campaign.
-            </p>
+                Thank you for being a part of this campaign. The campaign has ended, and we appreciate your participation.            </p>
             <p style="margin: 0; font-size: 13px; color: #9f1239;">
                 Entries and rewards submission for this outlet have been locked by Kolkata Divisional Office.
             </p>
