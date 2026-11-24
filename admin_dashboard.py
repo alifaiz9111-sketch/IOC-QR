@@ -250,7 +250,6 @@ if not st.session_state.authenticated:
 
     st.stop()
 
-
 # ==============================================================================
 # EXECUTIVE ADMIN DASHBOARD ONLY (DARK OBSIDIAN + AMBER THEME • 19+1 WINNERS)
 # ==============================================================================
@@ -688,7 +687,291 @@ if st.session_state.user_role == "admin":
     with col_chart:
         # Compute Sales_Area counts across the 20 winners
         area_counts = (
-            df_all
+            df_all_winners.groupby("sales_area")
+            .size()
+            .reset_index(name="winners")
+            .sort_values(by=["winners", "sales_area"], ascending=[False, True])
+        )
+        max_w = max(int(area_counts["winners"].max()), 1)
+
+        short_labels = {
+            "Kolkata South RSA": "Kol South",
+            "Kolkata-North RSA": "Kol North",
+            "Garia RSA": "Garia",
+            "Kolkata New Town RSA": "New Town",
+            "Barasat RSA": "Barasat",
+            "Kalyani RSA": "Kalyani",
+            "Krishnanagar RSA": "Krishnanagar",
+            "24 Parganas(S) RSA": "24 Pgs (S)",
+        }
+
+        bars_html = ""
+        for idx, r in area_counts.iterrows():
+            area_full = r["sales_area"]
+            cnt = int(r["winners"])
+            pct_h = int(round((cnt / max_w) * 145))
+            lbl = short_labels.get(area_full, area_full.replace(" RSA", ""))
+            is_top = (cnt == max_w)
+            fill_cls = "bar-fill bar-fill-active" if is_top else "bar-fill"
+            lbl_cls = "bar-lbl bar-lbl-active" if is_top else "bar-lbl"
+            bars_html += f"""
+            <div class="bar-col-wrap" title="{area_full}: {cnt} Winners">
+                <div class="bar-val-tag">{cnt}</div>
+                <div class="bar-track">
+                    <div class="{fill_cls}" style="height: {pct_h}px;"></div>
+                </div>
+                <div class="{lbl_cls}">{lbl}</div>
+            </div>
+            """
+
+        st.markdown(
+            f"""
+            <div class="dark-panel">
+                <div class="panel-header-row">
+                    <div class="panel-title">Winners by Sales Area</div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="pill-chip">All 8 RSAs</span>
+                        <span class="pill-chip">20 Groups (A–T)</span>
+                    </div>
+                </div>
+                <div class="bar-chart-grid">
+                    {bars_html}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with col_right:
+        if not st.session_state.admin_reveal_iphone_done:
+            st.markdown(
+                """
+                <div class="dark-panel">
+                    <div class="panel-header-row" style="margin-bottom: 10px;">
+                        <div class="panel-title">Grand Prize (1st Position)</div>
+                    </div>
+                    <div class="grand-kpi-val">iPhone 17 Pro Max</div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div class="orb-icon"></div>
+                        <div style="font-size: 12px; color: #9ca3af; line-height: 1.5;">
+                            Reserved for <strong style="color: #ffffff;">Position #1</strong> grand draw winner across all 26,464 verified entries.
+                        </div>
+                    </div>
+                    <div class="spark-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 11px; color: #7c828d;">Grand Winner Status</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #f58220; margin-top: 2px;">
+                                    {status_txt}
+                                </div>
+                            </div>
+                            <svg width="110" height="36" viewBox="0 0 110 36" fill="none">
+                                <path d="M2 28 C18 26, 24 12, 42 18 C58 24, 68 8, 86 14 C96 17, 102 6, 108 4" stroke="#f58220" stroke-width="2.2" fill="none"/>
+                                <circle cx="108" cy="4" r="3" fill="#ff9d47"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                """.replace(
+                    "{status_txt}",
+                    "Ready to Reveal" if st.session_state.admin_reveal_list_done else "Locked (Reveal #20–#2 First)"
+                ),
+                unsafe_allow_html=True
+            )
+        else:
+            gw = grand_iphone_winner
+            st.markdown(
+                f"""
+                <div class="dark-panel" style="border: 1px solid #f58220; box-shadow: 0 0 28px rgba(245, 130, 32, 0.22);">
+                    <div class="panel-header-row" style="margin-bottom: 8px;">
+                        <div class="panel-title" style="color: #f58220;">1st Prize &bull; Grand Winner</div>
+                        <span class="pill-chip" style="border-color: #f58220; color: #ffb168;">Rank #1</span>
+                    </div>
+                    <div class="grand-kpi-val" style="font-size: 26px; margin-bottom: 8px;">{gw['name']}</div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                        <div class="orb-icon"></div>
+                        <div style="font-size: 12px; color: #d1d5db; line-height: 1.5;">
+                            Won <strong style="color: #ffffff;">Apple iPhone 17 Pro Max</strong><br>
+                            Outlet: <strong style="color: #f58220;">{gw['ro_name']} ({gw['ro_code']})</strong>
+                        </div>
+                    </div>
+                    <div class="spark-box">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                            <span style="color: #9ca3af;">Mobile: <strong style="color: #ffffff;">{gw['phone']}</strong></span>
+                            <span style="color: #9ca3af;">Area: <strong style="color: #f58220;">{gw['sales_area']}</strong></span>
+                        </div>
+                        <div style="font-size: 11px; color: #7c828d; margin-top: 4px;">
+                            Verified Invoice No: <strong style="color: #e5e7eb;">{gw['bill_no']}</strong>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+
+    # ==========================================================================
+    # BOTTOM PANEL: WINNERS LIST TABLE (20TH TO 1ST) + REVEAL CONTROLS
+    # ==========================================================================
+    st.markdown(
+        """
+        <div class="dark-panel" style="padding-bottom: 14px;">
+            <div class="panel-header-row" style="margin-bottom: 10px;">
+                <div class="panel-title" style="font-size: 17px;">Official Winners Directory (20th to 1st)</div>
+                <span style="font-size: 12px; color: #7c828d;">Descending Rank Sequence (#20 &rarr; #1)</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Action / Filter Bar directly inside the Winners section
+    if not st.session_state.admin_reveal_list_done:
+        st.markdown(
+            """
+            <div style="background: #15161a; border: 1px solid #22242c; border-radius: 12px; padding: 34px 24px; text-align: center; margin-top: -10px;">
+                <div style="font-size: 15px; font-weight: 600; color: #f3f4f6; margin-bottom: 6px;">
+                    Winners List Ready for Stage Declaration
+                </div>
+                <div style="font-size: 13px; color: #7c828d; margin-bottom: 18px;">
+                    Click below to reveal positions #20 down to #2 first, followed by the Grand iPhone Winner (#1).
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        b_c1, b_c2, b_c3 = st.columns([1.3, 2, 1.3])
+        with b_c2:
+            if st.button("Reveal 20th to 2nd Position Winners", use_container_width=True, key="btn_admin_reveal_20_to_2"):
+                prog = st.progress(0, text="Loading verified winners from 19+1.xlsx...")
+                for pct in range(0, 101, 25):
+                    time.sleep(0.11)
+                    prog.progress(pct, text=f"Decrypting verified entries... {pct}%")
+                prog.empty()
+                st.session_state.admin_reveal_list_done = True
+                st.rerun()
+    else:
+        # Search & Sales Area Filter bar (matching reference bottom-right search & filter)
+        f_col1, f_col2, f_col3 = st.columns([2.6, 1.5, 1.3])
+        with f_col1:
+            search_winner = st.text_input(
+                "Search Winner",
+                value="",
+                placeholder="Search winner name, RO code, outlet, or bill...",
+                label_visibility="collapsed",
+                key="admin_winner_search"
+            ).strip().lower()
+        with f_col2:
+            area_options = ["All Sales Areas"] + sorted(df_all_winners["sales_area"].unique().tolist())
+            selected_area = st.selectbox(
+                "Filter Sales Area",
+                area_options,
+                index=0,
+                label_visibility="collapsed",
+                key="admin_winner_area_filter"
+            )
+        with f_col3:
+            if not st.session_state.admin_reveal_iphone_done:
+                if st.button("Reveal 1st Prize (iPhone)", use_container_width=True, key="btn_admin_reveal_iphone_top"):
+                    with st.spinner("Unlocking 1st Prize Grand Winner..."):
+                        time.sleep(0.9)
+                    st.session_state.admin_reveal_iphone_done = True
+                    st.rerun()
+            else:
+                if st.button("Reset Reveal", use_container_width=True, key="btn_admin_reset_reveal"):
+                    st.session_state.admin_reveal_list_done = False
+                    st.session_state.admin_reveal_iphone_done = False
+                    st.rerun()
+
+        # Build list ordered strictly from 20th at top down to 2nd (and 1st at bottom once revealed)
+        visible_winners = list(runners_up_list)  # already sorted rank 20 -> 2
+        if st.session_state.admin_reveal_iphone_done:
+            visible_winners.append(grand_iphone_winner)  # adds rank 1 at the bottom
+
+        # Apply search & Sales Area filter
+        filtered_winners = []
+        for w in visible_winners:
+            if selected_area != "All Sales Areas" and w["sales_area"] != selected_area:
+                continue
+            if search_winner:
+                haystack = f"{w['rank']} {w['name']} {w['ro_code']} {w['ro_name']} {w['sales_area']} {w['bill_no']} {w['phone']}".lower()
+                if search_winner not in haystack:
+                    continue
+            filtered_winners.append(w)
+
+        # Render Dark Table matching Reference Bottom Table
+        rows_html = ""
+        for idx, w in enumerate(filtered_winners):
+            is_grand = (w["rank"] == 1)
+            tr_cls = "grand-row" if is_grand else ""
+            dot_cls = "dot-orange" if is_grand else ("dot-green" if w["rank"] in (2, 3) else "dot-blue")
+            status_cls = "status-pill-amber" if is_grand else "status-pill-green"
+            status_text = "Grand Prize (#1)" if is_grand else "Verified Winner"
+            prize_label = w["prize"] if w.get("prize") else ("Apple iPhone 17 Pro Max" if is_grand else "vivo 5G Smartphone")
+
+            rows_html += f"""
+            <tr class="{tr_cls}" style="animation-delay: {round(idx * 0.025, 3)}s;">
+                <td style="font-weight: 700; color: {'#f58220' if is_grand else '#ffffff'};">#{w['rank']}</td>
+                <td>
+                    <span class="dot-badge">
+                        <span class="{dot_cls}"></span>
+                        <span>{w['name']}</span>
+                    </span>
+                </td>
+                <td><span class="{status_cls}">{status_text}</span></td>
+                <td style="color: #d1d5db;">{w['ro_name']} <span style="color: #7c828d;">({w['ro_code']})</span></td>
+                <td style="color: #9ca3af;">{w['sales_area']}</td>
+                <td style="font-weight: 600; color: {'#ffb168' if is_grand else '#e5e7eb'};">{prize_label}</td>
+                <td style="color: #9ca3af;">{w['phone']} &bull; Bill {w['bill_no']}</td>
+            </tr>
+            """
+
+        if not rows_html:
+            rows_html = """
+            <tr>
+                <td colspan="7" style="text-align: center; color: #7c828d; padding: 24px;">
+                    No winners match your current search or Sales Area filter.
+                </td>
+            </tr>
+            """
+
+        st.markdown(
+            f"""
+            <div class="dark-table-wrap">
+                <table class="dark-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Winner Name</th>
+                            <th>Status</th>
+                            <th>Retail Outlet</th>
+                            <th>Sales Area</th>
+                            <th>Prize Award</th>
+                            <th>Contact &amp; Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Secondary Grand Prize Reveal CTA right below the table if not yet unlocked
+        if not st.session_state.admin_reveal_iphone_done:
+            st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+            g_c1, g_c2, g_c3 = st.columns([1.2, 2.2, 1.2])
+            with g_c2:
+                if st.button("Reveal Grand iPhone Winner (1st Prize)", use_container_width=True, key="btn_admin_reveal_iphone_bottom"):
+                    with st.spinner("Unlocking Grand Prize Winner..."):
+                        time.sleep(0.9)
+                    st.session_state.admin_reveal_iphone_done = True
+                    st.rerun()
+
+    st.stop()
 
 # ----------------- LOGGED IN HEADER (DEV & RO UNCHANGED) -----------------
 top_col1, top_col2 = st.columns([3, 1])
