@@ -251,7 +251,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ==============================================================================
-# EXECUTIVE ADMIN DASHBOARD ONLY (DARK OBSIDIAN + AMBER THEME • 19+1 WINNERS)
+# EXECUTIVE ADMIN DASHBOARD ONLY (BRAND THEME + LEFT SIDEBAR + 19+1 WINNERS)
 # ==============================================================================
 if st.session_state.user_role == "admin":
     EMBEDDED_19_PLUS_1 = [
@@ -280,127 +280,62 @@ if st.session_state.user_role == "admin":
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-        /* Full Dark Obsidian Canvas matching Reference UI */
-        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-            background-color: #0e0f12 !important;
-            color: #f3f4f6 !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        }
-        [data-testid="stSidebar"] {
-            background-color: #131418 !important;
-            border-right: 1px solid #22242a !important;
-        }
         .block-container {
-            max-width: 1260px !important;
+            max-width: 1240px !important;
             padding-top: 1.4rem !important;
             padding-bottom: 3rem !important;
         }
-
-        /* Amber-Orange Buttons */
+        [data-testid="stSidebar"] {
+            background-color: #fffdf9 !important;
+            border-right: 1px solid #fde2cf !important;
+        }
         div.stButton > button {
-            background: linear-gradient(180deg, #f58220 0%, #d96b10 100%) !important;
+            background-color: #f37022 !important;
             color: #ffffff !important;
-            border: 1px solid #ff9d47 !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
+            border: none !important;
+            border-radius: 6px !important;
+            font-weight: 700 !important;
             font-size: 13px !important;
             padding: 9px 18px !important;
-            letter-spacing: 0.2px !important;
-            box-shadow: 0 4px 14px rgba(245, 130, 32, 0.25) !important;
             transition: all 0.2s ease !important;
         }
         div.stButton > button:hover {
-            background: linear-gradient(180deg, #ff9233 0%, #e07114 100%) !important;
+            background-color: #d85c14 !important;
+            color: #ffffff !important;
             transform: translateY(-1px) !important;
-            box-shadow: 0 6px 20px rgba(245, 130, 32, 0.38) !important;
         }
-
-        /* Dark Inputs & Selectboxes */
-        div[data-testid="stTextInput"] input,
-        div[data-testid="stSelectbox"] > div > div {
-            background-color: #1a1c21 !important;
-            color: #e5e7eb !important;
-            border: 1px solid #2a2d35 !important;
-            border-radius: 8px !important;
-            font-size: 13px !important;
-        }
-        div[data-testid="stTextInput"] label,
-        div[data-testid="stSelectbox"] label {
-            color: #9ca3af !important;
-            font-size: 11px !important;
-        }
-
-        /* Top Bar Styling */
-        .neutra-topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #1f2128;
-            margin-bottom: 20px;
-        }
-        .neutra-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0;
-            letter-spacing: -0.3px;
-        }
-        .neutra-subtitle {
-            font-size: 13px;
-            color: #7c828d;
-            margin-top: 2px;
-        }
-        .pill-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #17181d;
-            border: 1px solid #272932;
-            color: #d1d5db;
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .pill-chip-light {
-            background: #f3f4f6;
-            color: #111827;
-            border: 1px solid #e5e7eb;
-        }
-
-        /* Dark Cards */
-        .dark-panel {
-            background: #15161a;
-            border: 1px solid #22242c;
-            border-radius: 14px;
-            padding: 22px 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        .brand-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #f37022;
+            border-radius: 10px;
+            padding: 20px 22px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
             height: 100%;
         }
-        .panel-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-        .panel-title {
+        .brand-card-title {
             font-size: 16px;
-            font-weight: 600;
-            color: #f3f4f6;
+            font-weight: 700;
+            color: #1e293b;
             margin: 0;
         }
-
-        /* Vertical Orange Pillar Bar Chart (Reference Style) */
+        .brand-badge {
+            display: inline-block;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #c2410c;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
         .bar-chart-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 14px;
+            gap: 12px;
             align-items: end;
-            height: 215px;
-            padding: 12px 6px 0 6px;
+            height: 210px;
+            padding: 10px 4px 0 4px;
         }
         .bar-col-wrap {
             display: flex;
@@ -411,153 +346,103 @@ if st.session_state.user_role == "admin":
         }
         .bar-track {
             width: 24px;
-            height: 165px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            height: 160px;
+            background: #fff7ed;
+            border: 1px solid #ffedd5;
             border-radius: 6px;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding: 0;
-            position: relative;
         }
         .bar-fill {
             width: 22px;
-            background: linear-gradient(180deg, #ff993b 0%, #e87217 65%, #b85108 100%);
-            border-radius: 6px;
-            box-shadow: 0 4px 14px rgba(245, 130, 32, 0.28);
-            transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-        .bar-fill-active {
-            background: linear-gradient(180deg, #ffb168 0%, #f58220 55%, #c95808 100%);
-            box-shadow: 0 0 18px rgba(245, 130, 32, 0.50);
+            background: linear-gradient(180deg, #f37022 0%, #d85c14 100%);
+            border-radius: 5px;
+            transition: height 0.5s ease;
         }
         .bar-val-tag {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            color: #e5e7eb;
-            margin-bottom: 6px;
+            color: #1e293b;
+            margin-bottom: 5px;
         }
         .bar-lbl {
             font-size: 11px;
-            color: #7c828d;
-            margin-top: 10px;
+            color: #475569;
+            margin-top: 8px;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
             white-space: nowrap;
         }
-        .bar-lbl-active {
-            color: #ffffff;
-            font-weight: 700;
-        }
-
-        /* Right Summary Spotlight Card ("On this day" / Grand Prize style) */
-        .orb-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffd29d 0%, #f58220 55%, #9a3e04 100%);
-            box-shadow: 0 0 18px rgba(245, 130, 32, 0.45);
-            flex-shrink: 0;
-        }
-        .grand-kpi-val {
-            font-size: 30px;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-            margin: 4px 0 12px 0;
-        }
-        .spark-box {
-            margin-top: 14px;
-            background: #111216;
-            border: 1px solid #20222a;
-            border-radius: 10px;
+        .spotlight-box {
+            background: #fffdf9;
+            border: 1px solid #fde2cf;
+            border-radius: 8px;
             padding: 12px 14px;
+            margin-top: 12px;
         }
-
-        /* Dark Table Styling matching Reference Bottom Table */
         @keyframes rowFadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .dark-table-wrap {
+        .brand-table-wrap {
             width: 100%;
             overflow-x: auto;
-            margin-top: 8px;
+            margin-top: 6px;
         }
-        .dark-table {
+        .brand-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            background: #ffffff;
         }
-        .dark-table thead th {
+        .brand-table thead th {
             text-align: left;
-            color: #7c828d;
-            font-weight: 600;
+            color: #1e293b;
+            background: #fff7ed;
+            font-weight: 700;
             font-size: 12px;
-            padding: 12px 14px;
-            border-bottom: 1px solid #22242c;
-            background: #17181d;
+            padding: 11px 14px;
+            border-bottom: 2px solid #f37022;
         }
-        .dark-table tbody tr {
-            border-bottom: 1px solid #1d1f26;
-            transition: background 0.15s ease;
+        .brand-table tbody tr {
+            border-bottom: 1px solid #e2e8f0;
             animation: rowFadeIn 0.35s ease both;
         }
-        .dark-table tbody tr:hover {
-            background: #1b1d24;
+        .brand-table tbody tr:hover {
+            background: #fffdf9;
         }
-        .dark-table tbody tr.grand-row {
-            background: linear-gradient(90deg, rgba(245, 130, 32, 0.16) 0%, rgba(245, 130, 32, 0.04) 100%);
-            border-top: 1px solid rgba(245, 130, 32, 0.45);
-            border-bottom: 1px solid rgba(245, 130, 32, 0.45);
+        .brand-table tbody tr.grand-row {
+            background: #fff7ed;
+            border-top: 2px solid #f37022;
+            border-bottom: 2px solid #f37022;
         }
-        .dark-table td {
-            padding: 13px 14px;
-            color: #e5e7eb;
+        .brand-table td {
+            padding: 12px 14px;
+            color: #1e293b;
             vertical-align: middle;
-        }
-        .dot-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
-        .dot-orange {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #f58220;
-            display: inline-block;
-        }
-        .dot-green {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            display: inline-block;
-        }
-        .dot-blue {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #60a5fa;
-            display: inline-block;
-        }
-        .status-pill-amber {
-            color: #f58220;
-            font-weight: 600;
-            font-size: 12px;
-        }
-        .status-pill-green {
-            color: #34d399;
-            font-weight: 600;
-            font-size: 12px;
         }
         </style>
         """,
         unsafe_allow_html=True
     )
+
+    # Left Block: Sidebar with IndianOil Logo, Name, Logged-in User & Logout Button
+    with st.sidebar:
+        sb_c1, sb_c2, sb_c3 = st.columns([1, 2, 1])
+        with sb_c2:
+            if os.path.exists(LOCAL_LOGO_PATH):
+                st.image(LOCAL_LOGO_PATH, use_container_width=True)
+            else:
+                st.image(PROD_FALLBACK_URL, use_container_width=True)
+        st.markdown("<h4 style='text-align: center; margin-top: -20px; color: #1e293b;'>IndianOil</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #64748b; font-size: 13px; margin-bottom: 14px;'>Retail Campaign Management Portal</p>", unsafe_allow_html=True)
+        st.divider()
+        st.markdown(f"**Logged in:** {st.session_state.ro_name}")
+        if st.button("Logout", use_container_width=True, key="admin_sidebar_logout"):
+            st.session_state.admin_reveal_list_done = False
+            st.session_state.admin_reveal_iphone_done = False
+            logout()
 
     @st.cache_data(ttl=60)
     def load_admin_winners():
@@ -645,47 +530,15 @@ if st.session_state.user_role == "admin":
 
     df_all_winners, runners_up_list, grand_iphone_winner = load_admin_winners()
 
-    # Top Header Bar (matching reference top header)
-    top_l, top_r1, top_r2 = st.columns([4.5, 2.3, 1.1])
-    with top_l:
-        st.markdown(
-            """
-            <div>
-                <h1 class="neutra-title">IndianOil Mega Lucky Draw</h1>
-                <div class="neutra-subtitle">Kolkata Divisional Office &bull; Official 19 + 1 Winners Summary</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    with top_r1:
-        status_label = (
-            "20 / 20 Winners Declared"
-            if st.session_state.admin_reveal_iphone_done
-            else ("19 / 20 Winners Declared" if st.session_state.admin_reveal_list_done else "97 Active ROs &bull; 20 Groups")
-        )
-        st.markdown(
-            f"""
-            <div style="text-align: right; padding-top: 6px;">
-                <span class="pill-chip"><span class="dot-orange"></span>{status_label}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    with top_r2:
-        if st.button("Sign Out", use_container_width=True, key="admin_winner_logout"):
-            st.session_state.admin_reveal_list_done = False
-            st.session_state.admin_reveal_iphone_done = False
-            logout()
+    # Main Page Title
+    st.title("Executive Dashboard — Mega Lucky Draw Winners")
+    st.caption("Kolkata Divisional Office • 19 Smartphone Winners + 1 Grand iPhone Winner")
+    st.divider()
 
-    st.markdown("<div style='border-bottom: 1px solid #1f2128; margin: 10px 0 20px 0;'></div>", unsafe_allow_html=True)
-
-    # ==========================================================================
-    # TOP ROW: LEFT = SALES_AREA BAR CHART | RIGHT = GRAND PRIZE SPOTLIGHT CARD
-    # ==========================================================================
-    col_chart, col_right = st.columns([1.85, 1.15], gap="medium")
+    # Top Section: Sales_Area Graph (Left) + Grand Prize Card (Right)
+    col_chart, col_right = st.columns([1.8, 1.1], gap="medium")
 
     with col_chart:
-        # Compute Sales_Area counts across the 20 winners
         area_counts = (
             df_all_winners.groupby("sales_area")
             .size()
@@ -706,33 +559,27 @@ if st.session_state.user_role == "admin":
         }
 
         bars_html = ""
-        for idx, r in area_counts.iterrows():
+        for _, r in area_counts.iterrows():
             area_full = r["sales_area"]
             cnt = int(r["winners"])
-            pct_h = int(round((cnt / max_w) * 145))
+            pct_h = int(round((cnt / max_w) * 140))
             lbl = short_labels.get(area_full, area_full.replace(" RSA", ""))
-            is_top = (cnt == max_w)
-            fill_cls = "bar-fill bar-fill-active" if is_top else "bar-fill"
-            lbl_cls = "bar-lbl bar-lbl-active" if is_top else "bar-lbl"
             bars_html += f"""
             <div class="bar-col-wrap" title="{area_full}: {cnt} Winners">
                 <div class="bar-val-tag">{cnt}</div>
                 <div class="bar-track">
-                    <div class="{fill_cls}" style="height: {pct_h}px;"></div>
+                    <div class="bar-fill" style="height: {pct_h}px;"></div>
                 </div>
-                <div class="{lbl_cls}">{lbl}</div>
+                <div class="bar-lbl">{lbl}</div>
             </div>
             """
 
         st.markdown(
             f"""
-            <div class="dark-panel">
-                <div class="panel-header-row">
-                    <div class="panel-title">Winners by Sales Area</div>
-                    <div style="display: flex; gap: 8px;">
-                        <span class="pill-chip">All 8 RSAs</span>
-                        <span class="pill-chip">20 Groups (A–T)</span>
-                    </div>
+            <div class="brand-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="brand-card-title">Winners by Sales Area</div>
+                    <span class="brand-badge">20 Winners Across 8 RSAs</span>
                 </div>
                 <div class="bar-chart-grid">
                     {bars_html}
@@ -744,64 +591,54 @@ if st.session_state.user_role == "admin":
 
     with col_right:
         if not st.session_state.admin_reveal_iphone_done:
+            grand_status_txt = "Ready to Reveal" if st.session_state.admin_reveal_list_done else "Locked (Reveal #20-#2 First)"
             st.markdown(
-                """
-                <div class="dark-panel">
-                    <div class="panel-header-row" style="margin-bottom: 10px;">
-                        <div class="panel-title">Grand Prize (1st Position)</div>
+                f"""
+                <div class="brand-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="brand-card-title">1st Prize Grand Winner</div>
+                        <span class="brand-badge">Rank #1</span>
                     </div>
-                    <div class="grand-kpi-val">iPhone 17 Pro Max</div>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                        <div class="orb-icon"></div>
-                        <div style="font-size: 12px; color: #9ca3af; line-height: 1.5;">
-                            Reserved for <strong style="color: #ffffff;">Position #1</strong> grand draw winner across all 26,464 verified entries.
-                        </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #f37022; margin: 6px 0 10px 0;">
+                        Apple iPhone 17 Pro Max
                     </div>
-                    <div class="spark-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 11px; color: #7c828d;">Grand Winner Status</div>
-                                <div style="font-size: 14px; font-weight: 700; color: #f58220; margin-top: 2px;">
-                                    {status_txt}
-                                </div>
-                            </div>
-                            <svg width="110" height="36" viewBox="0 0 110 36" fill="none">
-                                <path d="M2 28 C18 26, 24 12, 42 18 C58 24, 68 8, 86 14 C96 17, 102 6, 108 4" stroke="#f58220" stroke-width="2.2" fill="none"/>
-                                <circle cx="108" cy="4" r="3" fill="#ff9d47"/>
-                            </svg>
+                    <div style="font-size: 13px; color: #475569; line-height: 1.5;">
+                        Grand draw first prize winner across all verified campaign entries.
+                    </div>
+                    <div class="spotlight-box">
+                        <div style="font-size: 11px; color: #64748b; font-weight: 600;">CURRENT STATUS</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">
+                            {grand_status_txt}
                         </div>
                     </div>
                 </div>
-                """.replace(
-                    "{status_txt}",
-                    "Ready to Reveal" if st.session_state.admin_reveal_list_done else "Locked (Reveal #20–#2 First)"
-                ),
+                """,
                 unsafe_allow_html=True
             )
         else:
             gw = grand_iphone_winner
             st.markdown(
                 f"""
-                <div class="dark-panel" style="border: 1px solid #f58220; box-shadow: 0 0 28px rgba(245, 130, 32, 0.22);">
-                    <div class="panel-header-row" style="margin-bottom: 8px;">
-                        <div class="panel-title" style="color: #f58220;">1st Prize &bull; Grand Winner</div>
-                        <span class="pill-chip" style="border-color: #f58220; color: #ffb168;">Rank #1</span>
+                <div class="brand-card" style="background: #fffdf9; border-color: #f37022;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="brand-card-title" style="color: #f37022;">1st Prize Grand Winner</div>
+                        <span class="brand-badge">Rank #1 Declared</span>
                     </div>
-                    <div class="grand-kpi-val" style="font-size: 26px; margin-bottom: 8px;">{gw['name']}</div>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                        <div class="orb-icon"></div>
-                        <div style="font-size: 12px; color: #d1d5db; line-height: 1.5;">
-                            Won <strong style="color: #ffffff;">Apple iPhone 17 Pro Max</strong><br>
-                            Outlet: <strong style="color: #f58220;">{gw['ro_name']} ({gw['ro_code']})</strong>
-                        </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #1e293b; margin: 4px 0 4px 0;">
+                        {gw['name']}
                     </div>
-                    <div class="spark-box">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                            <span style="color: #9ca3af;">Mobile: <strong style="color: #ffffff;">{gw['phone']}</strong></span>
-                            <span style="color: #9ca3af;">Area: <strong style="color: #f58220;">{gw['sales_area']}</strong></span>
+                    <div style="font-size: 13px; font-weight: 700; color: #f37022; margin-bottom: 8px;">
+                        Apple iPhone 17 Pro Max
+                    </div>
+                    <div class="spotlight-box">
+                        <div style="font-size: 12px; color: #1e293b; font-weight: 600;">
+                            Mobile: {gw['phone']} | Bill: {gw['bill_no']}
                         </div>
-                        <div style="font-size: 11px; color: #7c828d; margin-top: 4px;">
-                            Verified Invoice No: <strong style="color: #e5e7eb;">{gw['bill_no']}</strong>
+                        <div style="font-size: 12px; color: #475569; margin-top: 4px;">
+                            Outlet: {gw['ro_name']} ({gw['ro_code']})
+                        </div>
+                        <div style="font-size: 12px; color: #475569; margin-top: 2px;">
+                            Sales Area: {gw['sales_area']}
                         </div>
                     </div>
                 </div>
@@ -809,51 +646,46 @@ if st.session_state.user_role == "admin":
                 unsafe_allow_html=True
             )
 
-    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+    st.write("")
 
-    # ==========================================================================
-    # BOTTOM PANEL: WINNERS LIST TABLE (20TH TO 1ST) + REVEAL CONTROLS
-    # ==========================================================================
+    # Bottom Section: Winners List (20th to 1st) + Reveal Buttons
     st.markdown(
         """
-        <div class="dark-panel" style="padding-bottom: 14px;">
-            <div class="panel-header-row" style="margin-bottom: 10px;">
-                <div class="panel-title" style="font-size: 17px;">Official Winners Directory (20th to 1st)</div>
-                <span style="font-size: 12px; color: #7c828d;">Descending Rank Sequence (#20 &rarr; #1)</span>
+        <div class="brand-card" style="height: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="brand-card-title">Winners List (Position #20 to #1)</div>
+                <span class="brand-badge">Descending Sequence: #20 to #1</span>
             </div>
-        </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Action / Filter Bar directly inside the Winners section
     if not st.session_state.admin_reveal_list_done:
         st.markdown(
             """
-            <div style="background: #15161a; border: 1px solid #22242c; border-radius: 12px; padding: 34px 24px; text-align: center; margin-top: -10px;">
-                <div style="font-size: 15px; font-weight: 600; color: #f3f4f6; margin-bottom: 6px;">
-                    Winners List Ready for Stage Declaration
+            <div style="background: #fffdf9; border: 1px dashed #f37022; border-radius: 8px; padding: 28px 20px; text-align: center; margin: 10px 0 18px 0;">
+                <div style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">
+                    Ready to Reveal Winners (20th to 2nd Position)
                 </div>
-                <div style="font-size: 13px; color: #7c828d; margin-bottom: 18px;">
-                    Click below to reveal positions #20 down to #2 first, followed by the Grand iPhone Winner (#1).
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                    Click below to display the 19 winners from Position #20 down to Position #2, followed by the 1st Prize iPhone winner.
                 </div>
             </div>
             """,
             unsafe_allow_html=True
         )
-        b_c1, b_c2, b_c3 = st.columns([1.3, 2, 1.3])
+        b_c1, b_c2, b_c3 = st.columns([1.2, 2, 1.2])
         with b_c2:
             if st.button("Reveal 20th to 2nd Position Winners", use_container_width=True, key="btn_admin_reveal_20_to_2"):
                 prog = st.progress(0, text="Loading verified winners from 19+1.xlsx...")
                 for pct in range(0, 101, 25):
                     time.sleep(0.11)
-                    prog.progress(pct, text=f"Decrypting verified entries... {pct}%")
+                    prog.progress(pct, text=f"Preparing winners list... {pct}%")
                 prog.empty()
                 st.session_state.admin_reveal_list_done = True
                 st.rerun()
     else:
-        # Search & Sales Area Filter bar (matching reference bottom-right search & filter)
-        f_col1, f_col2, f_col3 = st.columns([2.6, 1.5, 1.3])
+        f_col1, f_col2, f_col3 = st.columns([2.5, 1.5, 1.3])
         with f_col1:
             search_winner = st.text_input(
                 "Search Winner",
@@ -884,12 +716,10 @@ if st.session_state.user_role == "admin":
                     st.session_state.admin_reveal_iphone_done = False
                     st.rerun()
 
-        # Build list ordered strictly from 20th at top down to 2nd (and 1st at bottom once revealed)
-        visible_winners = list(runners_up_list)  # already sorted rank 20 -> 2
+        visible_winners = list(runners_up_list)  # Rank 20 down to 2
         if st.session_state.admin_reveal_iphone_done:
-            visible_winners.append(grand_iphone_winner)  # adds rank 1 at the bottom
+            visible_winners.append(grand_iphone_winner)  # Rank 1 at bottom
 
-        # Apply search & Sales Area filter
         filtered_winners = []
         for w in visible_winners:
             if selected_area != "All Sales Areas" and w["sales_area"] != selected_area:
@@ -900,37 +730,27 @@ if st.session_state.user_role == "admin":
                     continue
             filtered_winners.append(w)
 
-        # Render Dark Table matching Reference Bottom Table
         rows_html = ""
         for idx, w in enumerate(filtered_winners):
             is_grand = (w["rank"] == 1)
             tr_cls = "grand-row" if is_grand else ""
-            dot_cls = "dot-orange" if is_grand else ("dot-green" if w["rank"] in (2, 3) else "dot-blue")
-            status_cls = "status-pill-amber" if is_grand else "status-pill-green"
-            status_text = "Grand Prize (#1)" if is_grand else "Verified Winner"
             prize_label = w["prize"] if w.get("prize") else ("Apple iPhone 17 Pro Max" if is_grand else "vivo 5G Smartphone")
 
             rows_html += f"""
             <tr class="{tr_cls}" style="animation-delay: {round(idx * 0.025, 3)}s;">
-                <td style="font-weight: 700; color: {'#f58220' if is_grand else '#ffffff'};">#{w['rank']}</td>
-                <td>
-                    <span class="dot-badge">
-                        <span class="{dot_cls}"></span>
-                        <span>{w['name']}</span>
-                    </span>
-                </td>
-                <td><span class="{status_cls}">{status_text}</span></td>
-                <td style="color: #d1d5db;">{w['ro_name']} <span style="color: #7c828d;">({w['ro_code']})</span></td>
-                <td style="color: #9ca3af;">{w['sales_area']}</td>
-                <td style="font-weight: 600; color: {'#ffb168' if is_grand else '#e5e7eb'};">{prize_label}</td>
-                <td style="color: #9ca3af;">{w['phone']} &bull; Bill {w['bill_no']}</td>
+                <td style="font-weight: 700; color: #f37022;">#{w['rank']}</td>
+                <td style="font-weight: 700; color: #1e293b;">{w['name']}</td>
+                <td style="color: #334155;">{w['ro_name']} <span style="color: #64748b;">({w['ro_code']})</span></td>
+                <td style="color: #475569; font-weight: 600;">{w['sales_area']}</td>
+                <td style="font-weight: 700; color: {'#f37022' if is_grand else '#1e293b'};">{prize_label}</td>
+                <td style="color: #475569;">{w['phone']} | Bill: {w['bill_no']}</td>
             </tr>
             """
 
         if not rows_html:
             rows_html = """
             <tr>
-                <td colspan="7" style="text-align: center; color: #7c828d; padding: 24px;">
+                <td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">
                     No winners match your current search or Sales Area filter.
                 </td>
             </tr>
@@ -938,17 +758,16 @@ if st.session_state.user_role == "admin":
 
         st.markdown(
             f"""
-            <div class="dark-table-wrap">
-                <table class="dark-table">
+            <div class="brand-table-wrap">
+                <table class="brand-table">
                     <thead>
                         <tr>
                             <th>Position</th>
                             <th>Winner Name</th>
-                            <th>Status</th>
                             <th>Retail Outlet</th>
                             <th>Sales Area</th>
-                            <th>Prize Award</th>
-                            <th>Contact &amp; Invoice</th>
+                            <th>Prize</th>
+                            <th>Mobile &amp; Bill No.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -960,9 +779,8 @@ if st.session_state.user_role == "admin":
             unsafe_allow_html=True
         )
 
-        # Secondary Grand Prize Reveal CTA right below the table if not yet unlocked
         if not st.session_state.admin_reveal_iphone_done:
-            st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+            st.write("")
             g_c1, g_c2, g_c3 = st.columns([1.2, 2.2, 1.2])
             with g_c2:
                 if st.button("Reveal Grand iPhone Winner (1st Prize)", use_container_width=True, key="btn_admin_reveal_iphone_bottom"):
@@ -971,8 +789,8 @@ if st.session_state.user_role == "admin":
                     st.session_state.admin_reveal_iphone_done = True
                     st.rerun()
 
+    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
-
 # ----------------- LOGGED IN HEADER (DEV & RO UNCHANGED) -----------------
 top_col1, top_col2 = st.columns([3, 1])
 is_admin_or_dev = st.session_state.user_role in ["admin", "dev"]
