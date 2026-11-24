@@ -250,104 +250,310 @@ if not st.session_state.authenticated:
 
     st.stop()
 
+
 # ==============================================================================
-# EXECUTIVE ADMIN DASHBOARD ONLY (19 + 1 MEGA LUCKY DRAW WINNERS FROM 19+1.xlsx)
+# EXECUTIVE ADMIN DASHBOARD ONLY (DARK OBSIDIAN + AMBER THEME • 19+1 WINNERS)
 # ==============================================================================
 if st.session_state.user_role == "admin":
     EMBEDDED_19_PLUS_1 = [
-        {"rank": 1, "name": "Akshat Bhardwaj", "phone": "89XXXX9956", "ro_code": "138854", "ro_name": "TRINATH SERVICE STATION", "sales_area": "Barasat RSA", "bill_no": "587940"},
-        {"rank": 2, "name": "Rio das", "phone": "62XXXX4145", "ro_code": "196643", "ro_name": "PAUL CHOWDHURY ENTERP", "sales_area": "Barasat RSA", "bill_no": "207725"},
-        {"rank": 3, "name": "Ruma Barat", "phone": "97XXXX7829", "ro_code": "164774", "ro_name": "MADHABI SERVICE STN", "sales_area": "Garia RSA", "bill_no": "534165"},
-        {"rank": 4, "name": "Anupam Mukhopadhyay", "phone": "89XXXX8987", "ro_code": "190654", "ro_name": "PRASADPUR SERVICE STATION", "sales_area": "Garia RSA", "bill_no": "340068"},
-        {"rank": 5, "name": "Amitava Pal", "phone": "81XXXX4776", "ro_code": "338777", "ro_name": "SOUTHERN FUEL SERVICE", "sales_area": "Garia RSA", "bill_no": "222530"},
-        {"rank": 6, "name": "Hirak Mukherjee", "phone": "70XXXX2240", "ro_code": "191100", "ro_name": "MANMATHA SERVICE CENTRE", "sales_area": "Kalyani RSA", "bill_no": "55566"},
-        {"rank": 7, "name": "Khyati Chopra", "phone": "84XXXX4168", "ro_code": "138056", "ro_name": "LAUHATI SERVICE STN", "sales_area": "Kolkata New Town RSA", "bill_no": "206886"},
-        {"rank": 8, "name": "Uma mondal", "phone": "90XXXX5784", "ro_code": "331989", "ro_name": "AGNIV SERVICE STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "688346"},
-        {"rank": 9, "name": "TAPAN KUMAR SARKAR", "phone": "98XXXX7296", "ro_code": "138621", "ro_name": "DELUXE SERVICE STN", "sales_area": "Kolkata South RSA", "bill_no": "407120"},
-        {"rank": 10, "name": "Jadunathchauhan", "phone": "94XXXX9286", "ro_code": "138709", "ro_name": "LUXMI NARAYAN SER. STN", "sales_area": "Kolkata South RSA", "bill_no": "109073"},
-        {"rank": 11, "name": "Mukesh Desai", "phone": "84XXXX2272", "ro_code": "190519", "ro_name": "JEET SERVICE STATION", "sales_area": "Kolkata South RSA", "bill_no": "295240"},
-        {"rank": 12, "name": "Tushar Pujara", "phone": "91XXXX7213", "ro_code": "190523", "ro_name": "OM AUTO SERVICE CORPORATION", "sales_area": "Kolkata South RSA", "bill_no": "994231"},
-        {"rank": 13, "name": "Saptarshi Dasgupta", "phone": "89XXXX2597", "ro_code": "137977", "ro_name": "B C DUTTA & BROTHERS", "sales_area": "Kolkata-North RSA", "bill_no": "808822"},
-        {"rank": 14, "name": "Pooja Verma", "phone": "96XXXX8345", "ro_code": "138661", "ro_name": "HIRJEE AUTO CENTRE", "sales_area": "Kolkata-North RSA", "bill_no": "489947"},
-        {"rank": 15, "name": "Monali Paswan", "phone": "98XXXX0269", "ro_code": "189016", "ro_name": "HAPPY SERVICE STATION", "sales_area": "Kolkata-North RSA", "bill_no": "962116"},
-        {"rank": 16, "name": "Myra Kotecha", "phone": "97XXXX1600", "ro_code": "191111", "ro_name": "THE JANATA S/STATION", "sales_area": "Kolkata-North RSA", "bill_no": "506656"},
-        {"rank": 17, "name": "Madhurima Midya", "phone": "96XXXX8692", "ro_code": "151172", "ro_name": "MA DURGA FUEL STN", "sales_area": "Krishnanagar RSA", "bill_no": "138810"},
-        {"rank": 18, "name": "Priyanka Dutta", "phone": "94XXXX6972", "ro_code": "240739", "ro_name": "G.Q.MONDAL SERVICE STATION", "sales_area": "24 Parganas(S) RSA", "bill_no": "546568"},
-        {"rank": 19, "name": "Kakoli De-Sarkar", "phone": "94XXXX1919", "ro_code": "385566", "ro_name": "ADHOC MATRI MONDIR FUEL STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "169743"},
-        {"rank": 20, "name": "Yuvaan Bhojani", "phone": "97XXXX3991", "ro_code": "392418", "ro_name": "ADHOC MAA SIDDHESHWARI FUEL STATION", "sales_area": "Kalyani RSA", "bill_no": "783884"},
+        {"rank": 1, "name": "Akshat Bhardwaj", "phone": "89XXXX9956", "ro_code": "138854", "ro_name": "TRINATH SERVICE STATION", "sales_area": "Barasat RSA", "bill_no": "587940", "prize": "Apple iPhone 17 Pro Max"},
+        {"rank": 2, "name": "Rio das", "phone": "62XXXX4145", "ro_code": "196643", "ro_name": "PAUL CHOWDHURY ENTERP", "sales_area": "Barasat RSA", "bill_no": "207725", "prize": "vivo 5G Smartphone"},
+        {"rank": 3, "name": "Ruma Barat", "phone": "97XXXX7829", "ro_code": "164774", "ro_name": "MADHABI SERVICE STN", "sales_area": "Garia RSA", "bill_no": "534165", "prize": "vivo 5G Smartphone"},
+        {"rank": 4, "name": "Anupam Mukhopadhyay", "phone": "89XXXX8987", "ro_code": "190654", "ro_name": "PRASADPUR SERVICE STATION", "sales_area": "Garia RSA", "bill_no": "340068", "prize": "vivo 5G Smartphone"},
+        {"rank": 5, "name": "Amitava Pal", "phone": "81XXXX4776", "ro_code": "338777", "ro_name": "SOUTHERN FUEL SERVICE", "sales_area": "Garia RSA", "bill_no": "222530", "prize": "vivo 5G Smartphone"},
+        {"rank": 6, "name": "Hirak Mukherjee", "phone": "70XXXX2240", "ro_code": "191100", "ro_name": "MANMATHA SERVICE CENTRE", "sales_area": "Kalyani RSA", "bill_no": "55566", "prize": "vivo 5G Smartphone"},
+        {"rank": 7, "name": "Khyati Chopra", "phone": "84XXXX4168", "ro_code": "138056", "ro_name": "LAUHATI SERVICE STN", "sales_area": "Kolkata New Town RSA", "bill_no": "206886", "prize": "vivo 5G Smartphone"},
+        {"rank": 8, "name": "Uma mondal", "phone": "90XXXX5784", "ro_code": "331989", "ro_name": "AGNIV SERVICE STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "688346", "prize": "vivo 5G Smartphone"},
+        {"rank": 9, "name": "TAPAN KUMAR SARKAR", "phone": "98XXXX7296", "ro_code": "138621", "ro_name": "DELUXE SERVICE STN", "sales_area": "Kolkata South RSA", "bill_no": "407120", "prize": "vivo 5G Smartphone"},
+        {"rank": 10, "name": "Jadunathchauhan", "phone": "94XXXX9286", "ro_code": "138709", "ro_name": "LUXMI NARAYAN SER. STN", "sales_area": "Kolkata South RSA", "bill_no": "109073", "prize": "vivo 5G Smartphone"},
+        {"rank": 11, "name": "Mukesh Desai", "phone": "84XXXX2272", "ro_code": "190519", "ro_name": "JEET SERVICE STATION", "sales_area": "Kolkata South RSA", "bill_no": "295240", "prize": "vivo 5G Smartphone"},
+        {"rank": 12, "name": "Tushar Pujara", "phone": "91XXXX7213", "ro_code": "190523", "ro_name": "OM AUTO SERVICE CORPORATION", "sales_area": "Kolkata South RSA", "bill_no": "994231", "prize": "vivo 5G Smartphone"},
+        {"rank": 13, "name": "Saptarshi Dasgupta", "phone": "89XXXX2597", "ro_code": "137977", "ro_name": "B C DUTTA & BROTHERS", "sales_area": "Kolkata-North RSA", "bill_no": "808822", "prize": "vivo 5G Smartphone"},
+        {"rank": 14, "name": "Pooja Verma", "phone": "96XXXX8345", "ro_code": "138661", "ro_name": "HIRJEE AUTO CENTRE", "sales_area": "Kolkata-North RSA", "bill_no": "489947", "prize": "vivo 5G Smartphone"},
+        {"rank": 15, "name": "Monali Paswan", "phone": "98XXXX0269", "ro_code": "189016", "ro_name": "HAPPY SERVICE STATION", "sales_area": "Kolkata-North RSA", "bill_no": "962116", "prize": "vivo 5G Smartphone"},
+        {"rank": 16, "name": "Myra Kotecha", "phone": "97XXXX1600", "ro_code": "191111", "ro_name": "THE JANATA S/STATION", "sales_area": "Kolkata-North RSA", "bill_no": "506656", "prize": "vivo 5G Smartphone"},
+        {"rank": 17, "name": "Madhurima Midya", "phone": "96XXXX8692", "ro_code": "151172", "ro_name": "MA DURGA FUEL STN", "sales_area": "Krishnanagar RSA", "bill_no": "138810", "prize": "vivo 5G Smartphone"},
+        {"rank": 18, "name": "Priyanka Dutta", "phone": "94XXXX6972", "ro_code": "240739", "ro_name": "G.Q.MONDAL SERVICE STATION", "sales_area": "24 Parganas(S) RSA", "bill_no": "546568", "prize": "vivo 5G Smartphone"},
+        {"rank": 19, "name": "Kakoli De-Sarkar", "phone": "94XXXX1919", "ro_code": "385566", "ro_name": "ADHOC MATRI MONDIR FUEL STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "169743", "prize": "vivo 5G Smartphone"},
+        {"rank": 20, "name": "Yuvaan Bhojani", "phone": "97XXXX3991", "ro_code": "392418", "ro_name": "ADHOC MAA SIDDHESHWARI FUEL STATION", "sales_area": "Kalyani RSA", "bill_no": "783884", "prize": "vivo 5G Smartphone"},
     ]
 
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* Full Dark Obsidian Canvas matching Reference UI */
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+            background-color: #0e0f12 !important;
+            color: #f3f4f6 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #131418 !important;
+            border-right: 1px solid #22242a !important;
+        }
         .block-container {
-            max-width: 960px;
-            padding-top: 1.5rem;
-            padding-bottom: 3rem;
+            max-width: 1260px !important;
+            padding-top: 1.4rem !important;
+            padding-bottom: 3rem !important;
         }
-        @keyframes fadeSlideUp {
-            0% { opacity: 0; transform: translateY(16px); }
-            100% { opacity: 1; transform: translateY(0); }
+
+        /* Amber-Orange Buttons */
+        div.stButton > button {
+            background: linear-gradient(180deg, #f58220 0%, #d96b10 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid #ff9d47 !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            padding: 9px 18px !important;
+            letter-spacing: 0.2px !important;
+            box-shadow: 0 4px 14px rgba(245, 130, 32, 0.25) !important;
+            transition: all 0.2s ease !important;
         }
-        @keyframes grandRevealScale {
-            0% { opacity: 0; transform: scale(0.94); }
-            100% { opacity: 1; transform: scale(1); }
+        div.stButton > button:hover {
+            background: linear-gradient(180deg, #ff9233 0%, #e07114 100%) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(245, 130, 32, 0.38) !important;
         }
-        .exec-header-box {
-            background: linear-gradient(135deg, #02164f 0%, #0a2a7a 100%);
-            border-bottom: 4px solid #f37022;
-            border-radius: 10px;
-            padding: 20px 26px;
-            color: #ffffff;
-            margin-bottom: 22px;
+
+        /* Dark Inputs & Selectboxes */
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stSelectbox"] > div > div {
+            background-color: #1a1c21 !important;
+            color: #e5e7eb !important;
+            border: 1px solid #2a2d35 !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
         }
-        .winner-row-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-left: 5px solid #02164f;
-            border-radius: 8px;
-            padding: 14px 20px;
-            margin-bottom: 10px;
+        div[data-testid="stTextInput"] label,
+        div[data-testid="stSelectbox"] label {
+            color: #9ca3af !important;
+            font-size: 11px !important;
+        }
+
+        /* Top Bar Styling */
+        .neutra-topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: fadeSlideUp 0.45s ease-out both;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1f2128;
+            margin-bottom: 20px;
         }
-        .rank-badge {
-            background-color: #02164f;
-            color: #ffffff;
+        .neutra-title {
+            font-size: 22px;
             font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+        .neutra-subtitle {
             font-size: 13px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            min-width: 78px;
-            text-align: center;
-            margin-right: 16px;
+            color: #7c828d;
+            margin-top: 2px;
         }
-        .rank-badge-top3 {
-            background-color: #f37022;
-        }
-        .iphone-grand-card {
-            background: linear-gradient(135deg, #fffdf9 0%, #fff7ed 100%);
-            border: 2px solid #f37022;
-            border-top: 6px solid #02164f;
-            border-radius: 12px;
-            padding: 30px 28px;
-            margin-top: 22px;
-            box-shadow: 0 12px 30px rgba(243, 112, 34, 0.18);
-            animation: grandRevealScale 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .iphone-pill {
-            display: inline-block;
-            background-color: #02164f;
-            color: #ffffff;
+        .pill-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #17181d;
+            border: 1px solid #272932;
+            color: #d1d5db;
+            padding: 7px 14px;
+            border-radius: 8px;
             font-size: 12px;
+            font-weight: 600;
+        }
+        .pill-chip-light {
+            background: #f3f4f6;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Dark Cards */
+        .dark-panel {
+            background: #15161a;
+            border: 1px solid #22242c;
+            border-radius: 14px;
+            padding: 22px 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            height: 100%;
+        }
+        .panel-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f3f4f6;
+            margin: 0;
+        }
+
+        /* Vertical Orange Pillar Bar Chart (Reference Style) */
+        .bar-chart-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 14px;
+            align-items: end;
+            height: 215px;
+            padding: 12px 6px 0 6px;
+        }
+        .bar-col-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+        .bar-track {
+            width: 24px;
+            height: 165px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+        }
+        .bar-fill {
+            width: 22px;
+            background: linear-gradient(180deg, #ff993b 0%, #e87217 65%, #b85108 100%);
+            border-radius: 6px;
+            box-shadow: 0 4px 14px rgba(245, 130, 32, 0.28);
+            transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .bar-fill-active {
+            background: linear-gradient(180deg, #ffb168 0%, #f58220 55%, #c95808 100%);
+            box-shadow: 0 0 18px rgba(245, 130, 32, 0.50);
+        }
+        .bar-val-tag {
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 6px 14px;
-            border-radius: 4px;
-            margin-bottom: 12px;
+            color: #e5e7eb;
+            margin-bottom: 6px;
+        }
+        .bar-lbl {
+            font-size: 11px;
+            color: #7c828d;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .bar-lbl-active {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Right Summary Spotlight Card ("On this day" / Grand Prize style) */
+        .orb-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffd29d 0%, #f58220 55%, #9a3e04 100%);
+            box-shadow: 0 0 18px rgba(245, 130, 32, 0.45);
+            flex-shrink: 0;
+        }
+        .grand-kpi-val {
+            font-size: 30px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            margin: 4px 0 12px 0;
+        }
+        .spark-box {
+            margin-top: 14px;
+            background: #111216;
+            border: 1px solid #20222a;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+
+        /* Dark Table Styling matching Reference Bottom Table */
+        @keyframes rowFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dark-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 8px;
+        }
+        .dark-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .dark-table thead th {
+            text-align: left;
+            color: #7c828d;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #22242c;
+            background: #17181d;
+        }
+        .dark-table tbody tr {
+            border-bottom: 1px solid #1d1f26;
+            transition: background 0.15s ease;
+            animation: rowFadeIn 0.35s ease both;
+        }
+        .dark-table tbody tr:hover {
+            background: #1b1d24;
+        }
+        .dark-table tbody tr.grand-row {
+            background: linear-gradient(90deg, rgba(245, 130, 32, 0.16) 0%, rgba(245, 130, 32, 0.04) 100%);
+            border-top: 1px solid rgba(245, 130, 32, 0.45);
+            border-bottom: 1px solid rgba(245, 130, 32, 0.45);
+        }
+        .dark-table td {
+            padding: 13px 14px;
+            color: #e5e7eb;
+            vertical-align: middle;
+        }
+        .dot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        .dot-orange {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f58220;
+            display: inline-block;
+        }
+        .dot-green {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+        }
+        .dot-blue {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #60a5fa;
+            display: inline-block;
+        }
+        .status-pill-amber {
+            color: #f58220;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .status-pill-green {
+            color: #34d399;
+            font-weight: 600;
+            font-size: 12px;
         }
         </style>
         """,
@@ -380,6 +586,7 @@ if st.session_state.user_role == "admin":
                 col_ro_name = find_col(["ro_name", "ro name", "outlet_name", "station"])
                 col_area = find_col(["sales_area", "sales area", "rsa", "area", "district"])
                 col_bill = find_col(["bill", "receipt", "invoice"])
+                col_prize = find_col(["prize", "reward", "gift", "item"])
 
                 parsed = []
                 for idx, row in df.iterrows():
@@ -398,6 +605,7 @@ if st.session_state.user_role == "admin":
                         else raw_phone
                     )
 
+                    default_prize = "Apple iPhone 17 Pro Max" if raw_rank == 1 else "vivo 5G Smartphone"
                     parsed.append({
                         "rank": raw_rank,
                         "name": str(row[col_name]).strip() if col_name and pd.notna(row[col_name]) else "Verified Participant",
@@ -405,7 +613,8 @@ if st.session_state.user_role == "admin":
                         "ro_code": str(row[col_ro_code]).strip() if col_ro_code and pd.notna(row[col_ro_code]) else "",
                         "ro_name": str(row[col_ro_name]).strip() if col_ro_name and pd.notna(row[col_ro_name]) else "",
                         "sales_area": str(row[col_area]).strip() if col_area and pd.notna(row[col_area]) else "",
-                        "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else ""
+                        "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else "",
+                        "prize": str(row[col_prize]).strip() if col_prize and pd.notna(row[col_prize]) else default_prize
                     })
                 if parsed:
                     records = parsed
@@ -428,172 +637,58 @@ if st.session_state.user_role == "admin":
                 .head(19)
                 .to_dict("records")
             )
-        return runners_up, grand_winner
+        return res_df, runners_up, grand_winner
 
     if "admin_reveal_list_done" not in st.session_state:
         st.session_state.admin_reveal_list_done = False
     if "admin_reveal_iphone_done" not in st.session_state:
         st.session_state.admin_reveal_iphone_done = False
 
-    # Top Header + Logout
-    h_col1, h_col2, h_col3 = st.columns([1, 4.5, 1.2])
-    with h_col1:
-        st.image(LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else PROD_FALLBACK_URL, width=95)
-    with h_col2:
+    df_all_winners, runners_up_list, grand_iphone_winner = load_admin_winners()
+
+    # Top Header Bar (matching reference top header)
+    top_l, top_r1, top_r2 = st.columns([4.5, 2.3, 1.1])
+    with top_l:
         st.markdown(
             """
-            <div class="exec-header-box">
-                <div style="font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: #fdba74; font-weight: 700;">
-                    IndianOil Kolkata Divisional Office
-                </div>
-                <h2 style="margin: 4px 0 4px 0; color: #ffffff; font-size: 24px;">
-                    Mega Lucky Draw — Official Winners (19 + 1)
-                </h2>
-                <div style="font-size: 13px; color: #e2e8f0;">
-                    Executive Announcement Portal • 19 Smartphone Winners + 1 Grand iPhone Winner
-                </div>
+            <div>
+                <h1 class="neutra-title">IndianOil Mega Lucky Draw</h1>
+                <div class="neutra-subtitle">Kolkata Divisional Office &bull; Official 19 + 1 Winners Summary</div>
             </div>
             """,
             unsafe_allow_html=True
         )
-    with h_col3:
-        st.write("")
-        if st.button("Logout", use_container_width=True, key="admin_winner_logout"):
+    with top_r1:
+        status_label = (
+            "20 / 20 Winners Declared"
+            if st.session_state.admin_reveal_iphone_done
+            else ("19 / 20 Winners Declared" if st.session_state.admin_reveal_list_done else "97 Active ROs &bull; 20 Groups")
+        )
+        st.markdown(
+            f"""
+            <div style="text-align: right; padding-top: 6px;">
+                <span class="pill-chip"><span class="dot-orange"></span>{status_label}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with top_r2:
+        if st.button("Sign Out", use_container_width=True, key="admin_winner_logout"):
             st.session_state.admin_reveal_list_done = False
             st.session_state.admin_reveal_iphone_done = False
             logout()
 
-    runners_up_list, grand_iphone_winner = load_admin_winners()
+    st.markdown("<div style='border-bottom: 1px solid #1f2128; margin: 10px 0 20px 0;'></div>", unsafe_allow_html=True)
 
-    # Stage 1: Reveal 20th to 2nd Winners
-    if not st.session_state.admin_reveal_list_done:
-        st.markdown(
-            """
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 36px 24px; text-align: center; margin: 16px 0;">
-                <h3 style="color: #02164f; margin-top: 0;">Ready for Official Winner Declaration</h3>
-                <p style="color: #475569; font-size: 14px; max-width: 560px; margin: 0 auto 22px auto;">
-                    Click below to unveil the 19 Mega Draw Winners starting from Position #20 down to Position #2.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        c1, c2, c3 = st.columns([1.2, 2, 1.2])
-        with c2:
-            if st.button("REVEAL WINNERS (20th TO 2nd POSITION)", use_container_width=True, key="btn_admin_reveal_20_to_2"):
-                progress_bar = st.progress(0, text="Verifying audit records and preparing winner list...")
-                for pct in range(0, 101, 20):
-                    time.sleep(0.14)
-                    progress_bar.progress(pct, text=f"Loading verified winners... {pct}%")
-                progress_bar.empty()
-                st.session_state.admin_reveal_list_done = True
-                st.rerun()
+    # ==========================================================================
+    # TOP ROW: LEFT = SALES_AREA BAR CHART | RIGHT = GRAND PRIZE SPOTLIGHT CARD
+    # ==========================================================================
+    col_chart, col_right = st.columns([1.85, 1.15], gap="medium")
 
-    # Stage 2: Display 20th -> 2nd List + Grand iPhone Winner Button
-    if st.session_state.admin_reveal_list_done:
-        st.markdown(
-            """
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0 14px 0;">
-                <h3 style="color: #02164f; margin: 0; font-size: 20px;">Winners List (Position #20 to #2)</h3>
-                <span style="font-size: 12px; color: #64748b; font-weight: 600;">Ordered from #20 (Top) to #2 (Bottom)</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        for i, w in enumerate(runners_up_list):
-            delay_sec = round(i * 0.04, 2)
-            badge_extra_cls = "rank-badge-top3" if w["rank"] in (2, 3) else ""
-            ro_detail = f"{w['ro_name']} ({w['ro_code']})" if w["ro_code"] else w["ro_name"]
-            area_detail = f" | {w['sales_area']}" if w["sales_area"] else ""
-            bill_detail = f" | Bill: {w['bill_no']}" if w["bill_no"] else ""
-
-            st.markdown(
-                f"""
-                <div class="winner-row-card" style="animation-delay: {delay_sec}s;">
-                    <div style="display: flex; align-items: center;">
-                        <div class="rank-badge {badge_extra_cls}">Rank #{w['rank']}</div>
-                        <div>
-                            <div style="font-size: 16px; font-weight: 700; color: #0f172a;">{w['name']}</div>
-                            <div style="font-size: 12px; color: #475569; margin-top: 2px;">
-                                <b>Outlet:</b> {ro_detail}{area_detail}
-                            </div>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 13px; font-weight: 700; color: #02164f;">{w['phone']}</div>
-                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Verified Entry{bill_detail}</div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        st.markdown("<hr style='border: 0; border-top: 1px solid #cbd5e1; margin: 28px 0;'>", unsafe_allow_html=True)
-
-        if not st.session_state.admin_reveal_iphone_done:
-            st.markdown(
-                """
-                <div style="text-align: center; margin-bottom: 14px;">
-                    <div style="font-size: 13px; font-weight: 700; color: #02164f; letter-spacing: 0.6px; text-transform: uppercase;">
-                        Grand Finale — First Prize Announcement
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            g1, g2, g3 = st.columns([1.1, 2.2, 1.1])
-            with g2:
-                if st.button("REVEAL GRAND IPHONE WINNER (1st PRIZE)", use_container_width=True, key="btn_admin_reveal_iphone"):
-                    with st.spinner("Unlocking Grand Prize Winner..."):
-                        time.sleep(1.1)
-                    st.session_state.admin_reveal_iphone_done = True
-                    st.rerun()
-        else:
-            gw = grand_iphone_winner
-            gw_ro = f"{gw['ro_name']} ({gw['ro_code']})" if gw["ro_code"] else gw["ro_name"]
-            gw_area = gw["sales_area"] if gw["sales_area"] else "Kolkata Divisional Office"
-            gw_bill = gw["bill_no"] if gw["bill_no"] else "Verified"
-
-            st.markdown(
-                f"""
-                <div class="iphone-grand-card">
-                    <div style="text-align: center;">
-                        <span class="iphone-pill">Grand Prize Winner — Position #1</span>
-                        <div style="font-size: 14px; font-weight: 700; color: #f37022; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">
-                            Apple iPhone 17 Pro Max Winner
-                        </div>
-                        <h1 style="margin: 0 0 8px 0; color: #02164f; font-size: 32px; font-weight: 800;">
-                            {gw['name']}
-                        </h1>
-                        <div style="font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 18px;">
-                            Mobile: {gw['phone']} &nbsp;|&nbsp; Invoice No: {gw_bill}
-                        </div>
-                    </div>
-                    <div style="background: #ffffff; border: 1px solid #fed7aa; border-radius: 8px; padding: 14px 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Retail Outlet</div>
-                            <div style="font-size: 14px; color: #0f172a; font-weight: 700;">{gw_ro}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Sales Area</div>
-                            <div style="font-size: 14px; color: #02164f; font-weight: 700;">{gw_area}</div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            st.write("")
-            r1, r2, r3 = st.columns([2, 1, 2])
-            with r2:
-                if st.button("Reset Reveal", use_container_width=True, key="btn_admin_reset_reveal"):
-                    st.session_state.admin_reveal_list_done = False
-                    st.session_state.admin_reveal_iphone_done = False
-                    st.rerun()
-
-    st.stop()
+    with col_chart:
+        # Compute Sales_Area counts across the 20 winners
+        area_counts = (
+            df_all
 
 # ----------------- LOGGED IN HEADER (DEV & RO UNCHANGED) -----------------
 top_col1, top_col2 = st.columns([3, 1])
