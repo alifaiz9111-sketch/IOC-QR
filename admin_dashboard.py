@@ -251,7 +251,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ==============================================================================
-# EXECUTIVE ADMIN DASHBOARD ONLY (CLEAN BRAND UI • LEFT SIDEBAR • 19+1 WINNERS)
+# EXECUTIVE ADMIN DASHBOARD ONLY (BRAND THEME • LEFT SIDEBAR • 19+1 WINNERS)
 # ==============================================================================
 if st.session_state.user_role == "admin":
     EMBEDDED_19_PLUS_1 = [
@@ -289,11 +289,6 @@ if st.session_state.user_role == "admin":
             background-color: #ffffff !important;
             border-right: 1px solid #e2e8f0 !important;
         }
-        [data-testid="stSidebar"] .block-container {
-            padding-top: 1.5rem !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
         div.stButton > button {
             background-color: #f37022 !important;
             color: #ffffff !important;
@@ -302,40 +297,18 @@ if st.session_state.user_role == "admin":
             font-weight: 600 !important;
             font-size: 14px !important;
             padding: 10px 18px !important;
-            transition: background-color 0.2s ease !important;
         }
         div.stButton > button:hover {
             background-color: #d85c14 !important;
             color: #ffffff !important;
         }
-        .admin-section-card {
+        .admin-card {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
             border-left: 4px solid #f37022;
             border-radius: 8px;
-            padding: 20px 22px;
-            margin-bottom: 18px;
-        }
-        .admin-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .admin-card-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
-        }
-        .admin-tag {
-            background-color: #fff7ed;
-            color: #c2410c;
-            border: 1px solid #fed7aa;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
         }
         .area-bar-chart {
             display: grid;
@@ -343,7 +316,7 @@ if st.session_state.user_role == "admin":
             gap: 10px;
             align-items: end;
             height: 205px;
-            padding-top: 12px;
+            padding-top: 10px;
         }
         .area-bar-col {
             display: flex;
@@ -360,7 +333,7 @@ if st.session_state.user_role == "admin":
         }
         .area-bar-track {
             width: 24px;
-            height: 150px;
+            height: 148px;
             background-color: #fff7ed;
             border-radius: 6px;
             display: flex;
@@ -384,7 +357,7 @@ if st.session_state.user_role == "admin":
             background-color: #fffdf9;
             border: 1px solid #fed7aa;
             border-radius: 8px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             margin-top: 10px;
         }
         @keyframes fadeSlideUp {
@@ -428,7 +401,7 @@ if st.session_state.user_role == "admin":
         unsafe_allow_html=True
     )
 
-    # Left Block: Logo, IndianOil Name, Logged-in User & Logout Button
+    # Left Block: IndianOil Logo, Name, Logged-in User & Logout Button
     with st.sidebar:
         sb_c1, sb_c2, sb_c3 = st.columns([1, 1.4, 1])
         with sb_c2:
@@ -563,28 +536,22 @@ if st.session_state.user_role == "admin":
             cnt = int(r["winners"])
             height_px = int(round((cnt / max_w) * 140))
             lbl = short_labels.get(area_full, area_full.replace(" RSA", ""))
-            bars_html += f"""
-            <div class="area-bar-col" title="{area_full}: {cnt} Winners">
-                <div class="area-bar-num">{cnt}</div>
-                <div class="area-bar-track">
-                    <div class="area-bar-fill" style="height: {height_px}px;"></div>
-                </div>
-                <div class="area-bar-label">{lbl}</div>
-            </div>
-            """
+            bars_html += (
+                f'<div class="area-bar-col" title="{area_full}: {cnt} Winners">'
+                f'<div class="area-bar-num">{cnt}</div>'
+                f'<div class="area-bar-track"><div class="area-bar-fill" style="height: {height_px}px;"></div></div>'
+                f'<div class="area-bar-label">{lbl}</div>'
+                f'</div>'
+            )
 
         st.markdown(
-            f"""
-            <div class="admin-section-card">
-                <div class="admin-card-header">
-                    <div class="admin-card-title">Sales Area Winners Distribution</div>
-                    <span class="admin-tag">20 Winners</span>
-                </div>
-                <div class="area-bar-chart">
-                    {bars_html}
-                </div>
-            </div>
-            """,
+            f'<div class="admin-card">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+            f'<span style="font-size:17px;font-weight:700;color:#1e293b;">Sales Area Winners Distribution</span>'
+            f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">20 Winners</span>'
+            f'</div>'
+            f'<div class="area-bar-chart">{bars_html}</div>'
+            f'</div>',
             unsafe_allow_html=True
         )
 
@@ -592,64 +559,43 @@ if st.session_state.user_role == "admin":
         if not st.session_state.admin_reveal_iphone_done:
             status_msg = "Ready to reveal 1st prize" if st.session_state.admin_reveal_list_done else "Reveal 20th to 2nd winners first"
             st.markdown(
-                f"""
-                <div class="admin-section-card">
-                    <div class="admin-card-header">
-                        <div class="admin-card-title">1st Prize Grand Winner</div>
-                        <span class="admin-tag">Rank #1</span>
-                    </div>
-                    <div style="font-size: 20px; font-weight: 700; color: #f37022; margin-bottom: 6px;">
-                        Apple iPhone 17 Pro Max
-                    </div>
-                    <div style="font-size: 13px; color: #475569;">
-                        Grand prize winner slot for Position #1.
-                    </div>
-                    <div class="iphone-box">
-                        <div style="font-size: 12px; color: #64748b;">Status</div>
-                        <div style="font-size: 14px; font-weight: 700; color: #1e293b;">{status_msg}</div>
-                    </div>
-                </div>
-                """,
+                f'<div class="admin-card">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+                f'<span style="font-size:17px;font-weight:700;color:#1e293b;">1st Prize Grand Winner</span>'
+                f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">Rank #1</span>'
+                f'</div>'
+                f'<div style="font-size:20px;font-weight:700;color:#f37022;margin-bottom:6px;">Apple iPhone 17 Pro Max</div>'
+                f'<div style="font-size:13px;color:#475569;">Grand prize winner slot for Position #1.</div>'
+                f'<div class="iphone-box">'
+                f'<div style="font-size:12px;color:#64748b;">Status</div>'
+                f'<div style="font-size:14px;font-weight:700;color:#1e293b;">{status_msg}</div>'
+                f'</div>'
+                f'</div>',
                 unsafe_allow_html=True
             )
         else:
             gw = grand_iphone_winner
             st.markdown(
-                f"""
-                <div class="admin-section-card" style="background-color: #fffdf9;">
-                    <div class="admin-card-header">
-                        <div class="admin-card-title" style="color: #f37022;">1st Prize Grand Winner</div>
-                        <span class="admin-tag">Rank #1</span>
-                    </div>
-                    <div style="font-size: 20px; font-weight: 700; color: #1e293b;">
-                        {gw['name']}
-                    </div>
-                    <div style="font-size: 13px; font-weight: 700; color: #f37022; margin-bottom: 8px;">
-                        Apple iPhone 17 Pro Max
-                    </div>
-                    <div class="iphone-box">
-                        <div style="font-size: 13px; color: #1e293b;"><strong>Mobile:</strong> {gw['phone']} | <strong>Bill:</strong> {gw['bill_no']}</div>
-                        <div style="font-size: 13px; color: #475569; margin-top: 4px;"><strong>Outlet:</strong> {gw['ro_name']} ({gw['ro_code']})</div>
-                        <div style="font-size: 13px; color: #475569; margin-top: 2px;"><strong>Sales Area:</strong> {gw['sales_area']}</div>
-                    </div>
-                </div>
-                """,
+                f'<div class="admin-card" style="background-color:#fffdf9;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+                f'<span style="font-size:17px;font-weight:700;color:#f37022;">1st Prize Grand Winner</span>'
+                f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">Rank #1 Declared</span>'
+                f'</div>'
+                f'<div style="font-size:20px;font-weight:700;color:#1e293b;">{gw["name"]}</div>'
+                f'<div style="font-size:13px;font-weight:700;color:#f37022;margin-bottom:8px;">Apple iPhone 17 Pro Max</div>'
+                f'<div class="iphone-box">'
+                f'<div style="font-size:13px;color:#1e293b;"><strong>Mobile:</strong> {gw["phone"]} | <strong>Bill:</strong> {gw["bill_no"]}</div>'
+                f'<div style="font-size:13px;color:#475569;margin-top:4px;"><strong>Outlet:</strong> {gw["ro_name"]} ({gw["ro_code"]})</div>'
+                f'<div style="font-size:13px;color:#475569;margin-top:2px;"><strong>Sales Area:</strong> {gw["sales_area"]}</div>'
+                f'</div>'
+                f'</div>',
                 unsafe_allow_html=True
             )
 
-    st.markdown(
-        """
-        <div class="admin-section-card">
-            <div class="admin-card-header">
-                <div class="admin-card-title">Winners List (20th to 1st)</div>
-                <span class="admin-tag">20th to 1st</span>
-            </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.subheader("Winners List (20th to 1st)")
 
     if not st.session_state.admin_reveal_list_done:
-        st.write("Click below to reveal the winners from 20th to 2nd position.")
+        st.info("Click below to reveal the winners from 20th to 2nd position.")
         b1, b2, b3 = st.columns([1.2, 2, 1.2])
         with b2:
             if st.button("Reveal 20th to 2nd Winners", use_container_width=True, key="btn_admin_reveal_20_to_2"):
@@ -711,40 +657,28 @@ if st.session_state.user_role == "admin":
             is_first = (w["rank"] == 1)
             row_cls = "first-prize-row" if is_first else ""
             prize_txt = w["prize"] if w.get("prize") else ("Apple iPhone 17 Pro Max" if is_first else "vivo 5G Smartphone")
-            table_rows_html += f"""
-            <tr class="{row_cls}" style="animation-delay: {round(idx * 0.025, 3)}s;">
-                <td style="font-weight: 700; color: #f37022;">#{w['rank']}</td>
-                <td style="font-weight: 700;">{w['name']}</td>
-                <td>{w['ro_name']} ({w['ro_code']})</td>
-                <td>{w['sales_area']}</td>
-                <td style="font-weight: 700; color: {'#f37022' if is_first else '#1e293b'};">{prize_txt}</td>
-                <td>{w['phone']} | Bill: {w['bill_no']}</td>
-            </tr>
-            """
+            prize_color = "#f37022" if is_first else "#1e293b"
+            table_rows_html += (
+                f'<tr class="{row_cls}" style="animation-delay: {round(idx * 0.025, 3)}s;">'
+                f'<td style="font-weight:700;color:#f37022;">#{w["rank"]}</td>'
+                f'<td style="font-weight:700;">{w["name"]}</td>'
+                f'<td>{w["ro_name"]} ({w["ro_code"]})</td>'
+                f'<td>{w["sales_area"]}</td>'
+                f'<td style="font-weight:700;color:{prize_color};">{prize_txt}</td>'
+                f'<td>{w["phone"]} | Bill: {w["bill_no"]}</td>'
+                f'</tr>'
+            )
 
         if not table_rows_html:
-            table_rows_html = "<tr><td colspan='6' style='text-align: center; color: #64748b; padding: 18px;'>No matching winners found.</td></tr>"
+            table_rows_html = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:18px;">No matching winners found.</td></tr>'
 
         st.markdown(
-            f"""
-            <div style="overflow-x: auto; margin-top: 8px;">
-                <table class="winners-table">
-                    <thead>
-                        <tr>
-                            <th>Position</th>
-                            <th>Winner Name</th>
-                            <th>Retail Outlet</th>
-                            <th>Sales Area</th>
-                            <th>Prize</th>
-                            <th>Mobile &amp; Bill No.</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {table_rows_html}
-                    </tbody>
-                </table>
-            </div>
-            """,
+            f'<div style="overflow-x:auto;margin-top:8px;">'
+            f'<table class="winners-table">'
+            f'<thead><tr><th>Position</th><th>Winner Name</th><th>Retail Outlet</th><th>Sales Area</th><th>Prize</th><th>Mobile &amp; Bill No.</th></tr></thead>'
+            f'<tbody>{table_rows_html}</tbody>'
+            f'</table>'
+            f'</div>',
             unsafe_allow_html=True
         )
 
@@ -758,7 +692,6 @@ if st.session_state.user_role == "admin":
                     st.session_state.admin_reveal_iphone_done = True
                     st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # ----------------- LOGGED IN HEADER -----------------
