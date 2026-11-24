@@ -280,6 +280,14 @@ if st.session_state.user_role == "admin":
     st.markdown(
         """
         <style>
+        
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main, .block-container {
+            background-color: #ffffff !important;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #ffffff !important;
+        }
+
         .block-container {
             max-width: 1220px !important;
             padding-top: 1.5rem !important;
