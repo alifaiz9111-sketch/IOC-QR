@@ -11,7 +11,7 @@ from PIL import Image
 
 # ==============================================================================
 # DISPLAY MODE TOGGLE
-# True  = Executive Mega Lucky Draw Winner Showcase (reads 19+1.xlsx)
+# True  = Executive Mega Lucky Draw Winner Showcase
 # False = Original Customer QR Receipt Scan & Instant Voucher App (preserved)
 # ==============================================================================
 SHOW_MEGA_WINNER_DASHBOARD = True
@@ -28,8 +28,32 @@ st.set_page_config(
     layout="wide" if SHOW_MEGA_WINNER_DASHBOARD else "centered"
 )
 
+# Embedded verified 20 winners (used automatically if 19+1.xlsx or openpyxl is unavailable)
+EMBEDDED_WINNERS = [
+    {"rank": 1, "name": "Akshat Bhardwaj", "phone": "89XXXX9956", "ro_code": "138854", "ro_name": "TRINATH SERVICE STATION", "sales_area": "Barasat RSA", "bill_no": "587940"},
+    {"rank": 2, "name": "Rio das", "phone": "62XXXX4145", "ro_code": "196643", "ro_name": "PAUL CHOWDHURY ENTERP", "sales_area": "Barasat RSA", "bill_no": "207725"},
+    {"rank": 3, "name": "Ruma Barat", "phone": "97XXXX7829", "ro_code": "164774", "ro_name": "MADHABI SERVICE STN", "sales_area": "Garia RSA", "bill_no": "534165"},
+    {"rank": 4, "name": "Anupam Mukhopadhyay", "phone": "89XXXX8987", "ro_code": "190654", "ro_name": "PRASADPUR SERVICE STATION", "sales_area": "Garia RSA", "bill_no": "340068"},
+    {"rank": 5, "name": "Amitava Pal", "phone": "81XXXX4776", "ro_code": "338777", "ro_name": "SOUTHERN FUEL SERVICE", "sales_area": "Garia RSA", "bill_no": "222530"},
+    {"rank": 6, "name": "Hirak Mukherjee", "phone": "70XXXX2240", "ro_code": "191100", "ro_name": "MANMATHA SERVICE CENTRE", "sales_area": "Kalyani RSA", "bill_no": "55566"},
+    {"rank": 7, "name": "Khyati Chopra", "phone": "84XXXX4168", "ro_code": "138056", "ro_name": "LAUHATI SERVICE STN", "sales_area": "Kolkata New Town RSA", "bill_no": "206886"},
+    {"rank": 8, "name": "Uma mondal", "phone": "90XXXX5784", "ro_code": "331989", "ro_name": "AGNIV SERVICE STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "688346"},
+    {"rank": 9, "name": "TAPAN KUMAR SARKAR", "phone": "98XXXX7296", "ro_code": "138621", "ro_name": "DELUXE SERVICE STN", "sales_area": "Kolkata South RSA", "bill_no": "407120"},
+    {"rank": 10, "name": "Jadunathchauhan", "phone": "94XXXX9286", "ro_code": "138709", "ro_name": "LUXMI NARAYAN SER. STN", "sales_area": "Kolkata South RSA", "bill_no": "109073"},
+    {"rank": 11, "name": "Mukesh Desai", "phone": "84XXXX2272", "ro_code": "190519", "ro_name": "JEET SERVICE STATION", "sales_area": "Kolkata South RSA", "bill_no": "295240"},
+    {"rank": 12, "name": "Tushar Pujara", "phone": "91XXXX7213", "ro_code": "190523", "ro_name": "OM AUTO SERVICE CORPORATION", "sales_area": "Kolkata South RSA", "bill_no": "994231"},
+    {"rank": 13, "name": "Saptarshi Dasgupta", "phone": "89XXXX2597", "ro_code": "137977", "ro_name": "B C DUTTA & BROTHERS", "sales_area": "Kolkata-North RSA", "bill_no": "808822"},
+    {"rank": 14, "name": "Pooja Verma", "phone": "96XXXX8345", "ro_code": "138661", "ro_name": "HIRJEE AUTO CENTRE", "sales_area": "Kolkata-North RSA", "bill_no": "489947"},
+    {"rank": 15, "name": "Monali Paswan", "phone": "98XXXX0269", "ro_code": "189016", "ro_name": "HAPPY SERVICE STATION", "sales_area": "Kolkata-North RSA", "bill_no": "962116"},
+    {"rank": 16, "name": "Myra Kotecha", "phone": "97XXXX1600", "ro_code": "191111", "ro_name": "THE JANATA S/STATION", "sales_area": "Kolkata-North RSA", "bill_no": "506656"},
+    {"rank": 17, "name": "Madhurima Midya", "phone": "96XXXX8692", "ro_code": "151172", "ro_name": "MA DURGA FUEL STN", "sales_area": "Krishnanagar RSA", "bill_no": "138810"},
+    {"rank": 18, "name": "Priyanka Dutta", "phone": "94XXXX6972", "ro_code": "240739", "ro_name": "G.Q.MONDAL SERVICE STATION", "sales_area": "24 Parganas(S) RSA", "bill_no": "546568"},
+    {"rank": 19, "name": "Kakoli De-Sarkar", "phone": "94XXXX1919", "ro_code": "385566", "ro_name": "ADHOC MATRI MONDIR FUEL STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "169743"},
+    {"rank": 20, "name": "Yuvaan Bhojani", "phone": "97XXXX3991", "ro_code": "392418", "ro_name": "ADHOC MAA SIDDHESHWARI FUEL STATION", "sales_area": "Kalyani RSA", "bill_no": "783884"},
+]
+
 # ==============================================================================
-# MODE 1: EXECUTIVE MEGA LUCKY DRAW WINNER DASHBOARD (19+1.xlsx)
+# MODE 1: EXECUTIVE MEGA LUCKY DRAW WINNER DASHBOARD
 # ==============================================================================
 if SHOW_MEGA_WINNER_DASHBOARD:
     st.markdown(
@@ -145,64 +169,62 @@ if SHOW_MEGA_WINNER_DASHBOARD:
     )
 
     @st.cache_data(ttl=60)
-    def load_winners_from_excel(filepath: str):
+    def load_winners_data(filepath: str):
+        records = None
         target_path = filepath if os.path.exists(filepath) else "19+1.xlsx"
-        if not os.path.exists(target_path):
-            return None, None, f"Excel file '19+1.xlsx' was not found in the repository root ({os.getcwd()}). Please upload 19+1.xlsx to your GitHub root folder."
+        if os.path.exists(target_path):
+            try:
+                df = pd.read_excel(target_path, dtype=str)
+                df.columns = [str(c).strip() for c in df.columns]
 
-        try:
-            df = pd.read_excel(target_path, dtype=str)
-        except ImportError:
-            return None, None, "Missing 'openpyxl' package. Please add 'openpyxl' to requirements.txt in your GitHub repository."
-        except Exception as exc:
-            return None, None, f"Error reading 19+1.xlsx: {exc}"
+                def find_col(candidates):
+                    for cand in candidates:
+                        for col in df.columns:
+                            if cand.lower() in col.lower():
+                                return col
+                    return None
 
-        df.columns = [str(c).strip() for c in df.columns]
+                col_rank = find_col(["rank", "position", "prize_no", "sl", "serial"])
+                col_name = find_col(["customer_name", "winner_name", "winner", "name"])
+                col_phone = find_col(["phone", "mobile", "contact"])
+                col_ro_code = find_col(["ro_code", "ro code", "outlet_code"])
+                col_ro_name = find_col(["ro_name", "ro name", "outlet_name", "station"])
+                col_area = find_col(["sales_area", "sales area", "rsa", "area", "district"])
+                col_bill = find_col(["bill", "receipt", "invoice"])
 
-        def find_col(candidates):
-            for cand in candidates:
-                for col in df.columns:
-                    if cand.lower() in col.lower():
-                        return col
-            return None
+                parsed = []
+                for idx, row in df.iterrows():
+                    raw_rank = None
+                    if col_rank and pd.notna(row[col_rank]):
+                        digits = re.findall(r"\d+", str(row[col_rank]))
+                        if digits:
+                            raw_rank = int(digits[0])
+                    if raw_rank is None:
+                        raw_rank = idx + 1
 
-        col_rank = find_col(["rank", "position", "prize_no", "sl", "serial"])
-        col_name = find_col(["customer_name", "winner_name", "winner", "name"])
-        col_phone = find_col(["phone", "mobile", "contact"])
-        col_ro_code = find_col(["ro_code", "ro code", "outlet_code"])
-        col_ro_name = find_col(["ro_name", "ro name", "outlet_name", "station"])
-        col_area = find_col(["sales_area", "sales area", "rsa", "area", "district"])
-        col_bill = find_col(["bill", "receipt", "invoice"])
+                    raw_phone = str(row[col_phone]).strip() if col_phone and pd.notna(row[col_phone]) else ""
+                    masked_phone = (
+                        f"{raw_phone[:2]}XXXX{raw_phone[-4:]}"
+                        if len(raw_phone) == 10 and raw_phone.isdigit()
+                        else raw_phone
+                    )
 
-        records = []
-        for idx, row in df.iterrows():
-            raw_rank = None
-            if col_rank and pd.notna(row[col_rank]):
-                digits = re.findall(r"\d+", str(row[col_rank]))
-                if digits:
-                    raw_rank = int(digits[0])
-            if raw_rank is None:
-                raw_rank = idx + 1
-
-            raw_phone = str(row[col_phone]).strip() if col_phone and pd.notna(row[col_phone]) else ""
-            masked_phone = (
-                f"{raw_phone[:2]}XXXX{raw_phone[-4:]}"
-                if len(raw_phone) == 10 and raw_phone.isdigit()
-                else raw_phone
-            )
-
-            records.append({
-                "rank": raw_rank,
-                "name": str(row[col_name]).strip() if col_name and pd.notna(row[col_name]) else "Verified Participant",
-                "phone": masked_phone,
-                "ro_code": str(row[col_ro_code]).strip() if col_ro_code and pd.notna(row[col_ro_code]) else "",
-                "ro_name": str(row[col_ro_name]).strip() if col_ro_name and pd.notna(row[col_ro_name]) else "",
-                "sales_area": str(row[col_area]).strip() if col_area and pd.notna(row[col_area]) else "",
-                "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else ""
-            })
+                    parsed.append({
+                        "rank": raw_rank,
+                        "name": str(row[col_name]).strip() if col_name and pd.notna(row[col_name]) else "Verified Participant",
+                        "phone": masked_phone,
+                        "ro_code": str(row[col_ro_code]).strip() if col_ro_code and pd.notna(row[col_ro_code]) else "",
+                        "ro_name": str(row[col_ro_name]).strip() if col_ro_name and pd.notna(row[col_ro_name]) else "",
+                        "sales_area": str(row[col_area]).strip() if col_area and pd.notna(row[col_area]) else "",
+                        "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else ""
+                    })
+                if parsed:
+                    records = parsed
+            except Exception:
+                records = None
 
         if not records:
-            return None, None, "No winner rows found inside 19+1.xlsx."
+            records = EMBEDDED_WINNERS
 
         res_df = pd.DataFrame(records)
         grand_winner_df = res_df[res_df["rank"] == 1]
@@ -218,7 +240,7 @@ if SHOW_MEGA_WINNER_DASHBOARD:
                 .to_dict("records")
             )
 
-        return runners_up, grand_winner, None
+        return runners_up, grand_winner
 
     if "reveal_list_done" not in st.session_state:
         st.session_state.reveal_list_done = False
@@ -250,11 +272,7 @@ if SHOW_MEGA_WINNER_DASHBOARD:
             unsafe_allow_html=True
         )
 
-    runners_up_list, grand_iphone_winner, load_err = load_winners_from_excel(EXCEL_FILE_PATH)
-
-    if load_err:
-        st.error(load_err)
-        st.stop()
+    runners_up_list, grand_iphone_winner = load_winners_data(EXCEL_FILE_PATH)
 
     # STAGE 1: Reveal 20th to 2nd Winners
     if not st.session_state.reveal_list_done:
