@@ -251,7 +251,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ==============================================================================
-# EXECUTIVE ADMIN DASHBOARD ONLY (BRAND THEME • LEFT SIDEBAR • 19+1 WINNERS)
+# EXECUTIVE ADMIN DASHBOARD ONLY (EXACT DEVELOPER DARK SLATE THEME • ZERO EMOJIS)
 # ==============================================================================
 if st.session_state.user_role == "admin":
     EMBEDDED_19_PLUS_1 = [
@@ -277,46 +277,111 @@ if st.session_state.user_role == "admin":
         {"rank": 20, "name": "Yuvaan Bhojani", "phone": "97XXXX3991", "ro_code": "392418", "ro_name": "ADHOC MAA SIDDHESHWARI FUEL STATION", "sales_area": "Kalyani RSA", "bill_no": "783884", "prize": "vivo 5G Smartphone"},
     ]
 
+    # Exact Streamlit Dark Slate Theme matching screenshot (#0e1117 main, #262730 sidebar, #f37022 saffron)
     st.markdown(
         """
         <style>
-        
-        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main, .block-container {
-            background-color: #ffffff !important;
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {
+            background-color: #0e1117 !important;
+            color: #fafafa !important;
         }
         [data-testid="stSidebar"] {
-            background-color: #ffffff !important;
+            background-color: #262730 !important;
+            border-right: 1px solid #31333f !important;
         }
-
+        [data-testid="stSidebar"] * {
+            color: #fafafa !important;
+        }
         .block-container {
-            max-width: 1220px !important;
-            padding-top: 1.5rem !important;
+            max-width: 1240px !important;
+            padding-top: 2rem !important;
             padding-bottom: 3rem !important;
         }
-        [data-testid="stSidebar"] {
-            background-color: #ffffff !important;
-            border-right: 1px solid #e2e8f0 !important;
+        h1 {
+            color: #ffffff !important;
+            font-size: 36px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.5px !important;
+            margin-bottom: 4px !important;
+        }
+        h2, h3, h4 {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        [data-testid="stCaptionContainer"], .stCaption {
+            color: #808495 !important;
+            font-size: 13px !important;
+        }
+        hr {
+            border-color: #262730 !important;
+            margin-top: 1.2rem !important;
+            margin-bottom: 1.4rem !important;
         }
         div.stButton > button {
             background-color: #f37022 !important;
             color: #ffffff !important;
             border: none !important;
-            border-radius: 6px !important;
+            border-radius: 8px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
             padding: 10px 18px !important;
+            transition: background-color 0.2s ease !important;
         }
         div.stButton > button:hover {
             background-color: #d85c14 !important;
             color: #ffffff !important;
         }
-        .admin-card {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-left: 4px solid #f37022;
-            border-radius: 8px;
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stSelectbox"] > div > div {
+            background-color: #161a23 !important;
+            color: #fafafa !important;
+            border: 1px solid #31333f !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+        }
+        div[data-testid="stMetric"] {
+            background: transparent !important;
+            border: none !important;
+            border-left: 4px solid #f37022 !important;
+            padding: 4px 14px !important;
+            border-radius: 0px !important;
+        }
+        div[data-testid="stMetricLabel"] p {
+            color: #cbd5e1 !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+        }
+        div[data-testid="stMetricValue"] {
+            color: #f37022 !important;
+            font-size: 30px !important;
+            font-weight: 700 !important;
+        }
+        .dark-box {
+            background-color: #0e1117;
+            border: 1px solid #262730;
+            border-radius: 10px;
             padding: 18px 20px;
             margin-bottom: 16px;
+        }
+        .dark-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .dark-box-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .dark-pill {
+            background-color: #161a23;
+            color: #f37022;
+            border: 1px solid #31333f;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
         }
         .area-bar-chart {
             display: grid;
@@ -336,72 +401,77 @@ if st.session_state.user_role == "admin":
         .area-bar-num {
             font-size: 12px;
             font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 4px;
+            color: #fafafa;
+            margin-bottom: 6px;
         }
         .area-bar-track {
             width: 24px;
-            height: 148px;
-            background-color: #fff7ed;
+            height: 145px;
+            background-color: #161a23;
+            border: 1px solid #262730;
             border-radius: 6px;
             display: flex;
             align-items: flex-end;
             justify-content: center;
         }
         .area-bar-fill {
-            width: 24px;
+            width: 22px;
             background-color: #f37022;
-            border-radius: 6px;
+            border-radius: 5px;
         }
         .area-bar-label {
             font-size: 11px;
-            font-weight: 600;
-            color: #475569;
+            font-weight: 500;
+            color: #808495;
             margin-top: 8px;
             text-align: center;
             white-space: nowrap;
         }
-        .iphone-box {
-            background-color: #fffdf9;
-            border: 1px solid #fed7aa;
+        .iphone-inner-box {
+            background-color: #161a23;
+            border: 1px solid #262730;
+            border-left: 4px solid #f37022;
             border-radius: 8px;
             padding: 12px 14px;
-            margin-top: 10px;
+            margin-top: 12px;
         }
         @keyframes fadeSlideUp {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .winners-table {
+        .dark-winners-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            background-color: #ffffff;
+            background-color: #0e1117;
+            border: 1px solid #262730;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        .winners-table thead th {
+        .dark-winners-table thead th {
             text-align: left;
             font-size: 12px;
-            font-weight: 700;
-            color: #475569;
-            background-color: #f8fafc;
-            padding: 10px 12px;
-            border-bottom: 2px solid #e2e8f0;
+            font-weight: 600;
+            color: #808495;
+            background-color: #161a23;
+            padding: 12px 14px;
+            border-bottom: 1px solid #262730;
         }
-        .winners-table tbody tr {
-            border-bottom: 1px solid #e2e8f0;
+        .dark-winners-table tbody tr {
+            border-bottom: 1px solid #262730;
             animation: fadeSlideUp 0.35s ease both;
         }
-        .winners-table tbody tr:hover {
-            background-color: #fffdf9;
+        .dark-winners-table tbody tr:hover {
+            background-color: #161a23;
         }
-        .winners-table tbody tr.first-prize-row {
-            background-color: #fff7ed;
-            border-top: 2px solid #f37022;
-            border-bottom: 2px solid #f37022;
+        .dark-winners-table tbody tr.first-prize-row {
+            background-color: #1f1712;
+            border-top: 1px solid #f37022;
+            border-bottom: 1px solid #f37022;
         }
-        .winners-table td {
-            padding: 11px 12px;
-            color: #1e293b;
+        .dark-winners-table td {
+            padding: 12px 14px;
+            color: #fafafa;
             vertical-align: middle;
         }
         </style>
@@ -409,22 +479,32 @@ if st.session_state.user_role == "admin":
         unsafe_allow_html=True
     )
 
-    # Left Block: IndianOil Logo, Name, Logged-in User & Logout Button
+    # Left Sidebar Block: IndianOil Logo, Name, Portal Label, Filters & Controls (Zero Emojis)
     with st.sidebar:
-        sb_c1, sb_c2, sb_c3 = st.columns([1, 1.4, 1])
+        sb_c1, sb_c2, sb_c3 = st.columns([0.8, 1.8, 0.8])
         with sb_c2:
             if os.path.exists(LOCAL_LOGO_PATH):
                 st.image(LOCAL_LOGO_PATH, use_container_width=True)
             else:
                 st.image(PROD_FALLBACK_URL, use_container_width=True)
-        st.markdown("<h3 style='text-align: center; margin-top: -12px; margin-bottom: 2px; color: #1e293b; font-size: 20px;'>IndianOil</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #64748b; font-size: 12px; margin-bottom: 16px;'>Retail Campaign Management Portal</p>", unsafe_allow_html=True)
+        st.markdown(
+            '<div style="text-align:center;font-size:16px;font-weight:700;color:#ffffff;margin-top:-8px;">IndianOil</div>'
+            '<div style="text-align:center;font-size:12px;color:#808495;margin-top:4px;margin-bottom:14px;">Retail Campaign Management Portal</div>',
+            unsafe_allow_html=True
+        )
         st.divider()
-        st.write(f"Logged in: **{st.session_state.ro_name}**")
-        if st.button("Logout", use_container_width=True, key="admin_sidebar_logout"):
-            st.session_state.admin_reveal_list_done = False
-            st.session_state.admin_reveal_iphone_done = False
-            logout()
+        st.markdown('<div style="font-size:16px;font-weight:700;color:#ffffff;margin-bottom:10px;">Filters &amp; Controls</div>', unsafe_allow_html=True)
+
+        if st.button("Refresh Data", use_container_width=True, key="admin_sb_refresh"):
+            st.cache_data.clear()
+            st.rerun()
+
+        search_q = st.text_input(
+            "Search Bill / Winner / Phone",
+            value="",
+            placeholder="Type keyword...",
+            key="admin_winner_search"
+        ).strip().lower()
 
     @st.cache_data(ttl=60)
     def load_admin_winners():
@@ -512,13 +592,46 @@ if st.session_state.user_role == "admin":
 
     df_all_winners, runners_up_list, grand_iphone_winner = load_admin_winners()
 
-    st.title("Mega Lucky Draw Winners")
-    st.caption("Kolkata Divisional Office • 19 Smartphone Winners + 1 Grand iPhone Winner")
+    with st.sidebar:
+        area_opts = ["All Sales Areas"] + sorted(df_all_winners["sales_area"].unique().tolist())
+        area_sel = st.selectbox("Filter Sales Area", area_opts, index=0, key="admin_winner_area_filter")
+
+        ro_opts = ["All Retail Outlets"] + sorted(
+            [f"{r['ro_code']} - {r['ro_name']}" for _, r in df_all_winners[["ro_code", "ro_name"]].drop_duplicates().iterrows()]
+        )
+        ro_sel = st.selectbox("Filter Retail Outlet", ro_opts, index=0, key="admin_winner_ro_filter")
+
+    # Top Header Row matching screenshot (Title + Subtitle left | Logged in + Logout right)
+    hdr_l, hdr_r = st.columns([3.2, 1])
+    with hdr_l:
+        st.title("Executive Dashboard")
+        st.caption("Divisional Office Master View • Mega Lucky Draw Winners (19 + 1)")
+    with hdr_r:
+        st.markdown(
+            f'<div style="text-align:right;font-size:14px;color:#fafafa;margin-bottom:8px;">Logged in: <strong>{st.session_state.ro_name}</strong></div>',
+            unsafe_allow_html=True
+        )
+        if st.button("Logout", use_container_width=True, key="admin_top_logout"):
+            st.session_state.admin_reveal_list_done = False
+            st.session_state.admin_reveal_iphone_done = False
+            logout()
+
     st.divider()
 
-    top_left, top_right = st.columns([1.85, 1.15], gap="medium")
+    # KPI Summary Strip with Left Saffron Accent Bars (matching screenshot)
+    declared_cnt = 20 if st.session_state.admin_reveal_iphone_done else (19 if st.session_state.admin_reveal_list_done else 0)
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Total Winners", "20")
+    k2.metric("Smartphone Winners", "19")
+    k3.metric("Grand Prize (iPhone)", "1")
+    k4.metric("Winners Declared", f"{declared_cnt} / 20")
 
-    with top_left:
+    st.divider()
+
+    # Middle Section: Sales Area Chart (Left) + 1st Prize Grand Winner Box (Right)
+    mid_left, mid_right = st.columns([1.85, 1.15], gap="medium")
+
+    with mid_left:
         area_counts = (
             df_all_winners.groupby("sales_area")
             .size()
@@ -542,7 +655,7 @@ if st.session_state.user_role == "admin":
         for _, r in area_counts.iterrows():
             area_full = r["sales_area"]
             cnt = int(r["winners"])
-            height_px = int(round((cnt / max_w) * 140))
+            height_px = int(round((cnt / max_w) * 138))
             lbl = short_labels.get(area_full, area_full.replace(" RSA", ""))
             bars_html += (
                 f'<div class="area-bar-col" title="{area_full}: {cnt} Winners">'
@@ -553,30 +666,30 @@ if st.session_state.user_role == "admin":
             )
 
         st.markdown(
-            f'<div class="admin-card">'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-            f'<span style="font-size:17px;font-weight:700;color:#1e293b;">Sales Area Winners Distribution</span>'
-            f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">20 Winners</span>'
+            f'<div class="dark-box">'
+            f'<div class="dark-box-header">'
+            f'<span class="dark-box-title">Sales Area Winners Distribution</span>'
+            f'<span class="dark-pill">8 Sales Areas</span>'
             f'</div>'
             f'<div class="area-bar-chart">{bars_html}</div>'
             f'</div>',
             unsafe_allow_html=True
         )
 
-    with top_right:
+    with mid_right:
         if not st.session_state.admin_reveal_iphone_done:
             status_msg = "Ready to reveal 1st prize" if st.session_state.admin_reveal_list_done else "Reveal 20th to 2nd winners first"
             st.markdown(
-                f'<div class="admin-card">'
-                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-                f'<span style="font-size:17px;font-weight:700;color:#1e293b;">1st Prize Grand Winner</span>'
-                f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">Rank #1</span>'
+                f'<div class="dark-box">'
+                f'<div class="dark-box-header">'
+                f'<span class="dark-box-title">1st Prize Grand Winner</span>'
+                f'<span class="dark-pill">Rank #1</span>'
                 f'</div>'
-                f'<div style="font-size:20px;font-weight:700;color:#f37022;margin-bottom:6px;">Apple iPhone 17 Pro Max</div>'
-                f'<div style="font-size:13px;color:#475569;">Grand prize winner slot for Position #1.</div>'
-                f'<div class="iphone-box">'
-                f'<div style="font-size:12px;color:#64748b;">Status</div>'
-                f'<div style="font-size:14px;font-weight:700;color:#1e293b;">{status_msg}</div>'
+                f'<div style="font-size:22px;font-weight:700;color:#f37022;margin-bottom:6px;">Apple iPhone 17 Pro Max</div>'
+                f'<div style="font-size:13px;color:#808495;">Grand prize winner slot for Position #1.</div>'
+                f'<div class="iphone-inner-box">'
+                f'<div style="font-size:12px;color:#808495;">Status</div>'
+                f'<div style="font-size:14px;font-weight:700;color:#fafafa;margin-top:2px;">{status_msg}</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True
@@ -584,56 +697,30 @@ if st.session_state.user_role == "admin":
         else:
             gw = grand_iphone_winner
             st.markdown(
-                f'<div class="admin-card" style="background-color:#fffdf9;">'
-                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-                f'<span style="font-size:17px;font-weight:700;color:#f37022;">1st Prize Grand Winner</span>'
-                f'<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;">Rank #1 Declared</span>'
+                f'<div class="dark-box" style="border-color:#f37022;">'
+                f'<div class="dark-box-header">'
+                f'<span class="dark-box-title" style="color:#f37022;">1st Prize Grand Winner</span>'
+                f'<span class="dark-pill">Rank #1 Declared</span>'
                 f'</div>'
-                f'<div style="font-size:20px;font-weight:700;color:#1e293b;">{gw["name"]}</div>'
-                f'<div style="font-size:13px;font-weight:700;color:#f37022;margin-bottom:8px;">Apple iPhone 17 Pro Max</div>'
-                f'<div class="iphone-box">'
-                f'<div style="font-size:13px;color:#1e293b;"><strong>Mobile:</strong> {gw["phone"]} | <strong>Bill:</strong> {gw["bill_no"]}</div>'
-                f'<div style="font-size:13px;color:#475569;margin-top:4px;"><strong>Outlet:</strong> {gw["ro_name"]} ({gw["ro_code"]})</div>'
-                f'<div style="font-size:13px;color:#475569;margin-top:2px;"><strong>Sales Area:</strong> {gw["sales_area"]}</div>'
+                f'<div style="font-size:22px;font-weight:700;color:#ffffff;margin-bottom:2px;">{gw["name"]}</div>'
+                f'<div style="font-size:13px;font-weight:600;color:#f37022;margin-bottom:8px;">Apple iPhone 17 Pro Max</div>'
+                f'<div class="iphone-inner-box">'
+                f'<div style="font-size:13px;color:#fafafa;"><strong>Mobile:</strong> {gw["phone"]} | <strong>Bill:</strong> {gw["bill_no"]}</div>'
+                f'<div style="font-size:13px;color:#cbd5e1;margin-top:4px;"><strong>Outlet:</strong> {gw["ro_name"]} ({gw["ro_code"]})</div>'
+                f'<div style="font-size:13px;color:#cbd5e1;margin-top:2px;"><strong>Sales Area:</strong> {gw["sales_area"]}</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True
             )
 
-    st.subheader("Winners List (20th to 1st)")
+    st.divider()
 
-    if not st.session_state.admin_reveal_list_done:
-        st.info("Click below to reveal the winners from 20th to 2nd position.")
-        b1, b2, b3 = st.columns([1.2, 2, 1.2])
-        with b2:
-            if st.button("Reveal 20th to 2nd Winners", use_container_width=True, key="btn_admin_reveal_20_to_2"):
-                prog = st.progress(0, text="Loading winners...")
-                for pct in range(0, 101, 25):
-                    time.sleep(0.1)
-                    prog.progress(pct, text=f"Loading winners... {pct}%")
-                prog.empty()
-                st.session_state.admin_reveal_list_done = True
-                st.rerun()
-    else:
-        f1, f2, f3 = st.columns([2.4, 1.5, 1.3])
-        with f1:
-            search_q = st.text_input(
-                "Search",
-                value="",
-                placeholder="Search name, RO code, outlet, or bill...",
-                label_visibility="collapsed",
-                key="admin_winner_search"
-            ).strip().lower()
-        with f2:
-            area_opts = ["All Sales Areas"] + sorted(df_all_winners["sales_area"].unique().tolist())
-            area_sel = st.selectbox(
-                "Sales Area",
-                area_opts,
-                index=0,
-                label_visibility="collapsed",
-                key="admin_winner_area_filter"
-            )
-        with f3:
+    # Bottom Section: Official Winners List (20th to 1st)
+    hdr_list_l, hdr_list_r = st.columns([3, 1.2])
+    with hdr_list_l:
+        st.subheader("Winners List (20th to 1st)")
+    with hdr_list_r:
+        if st.session_state.admin_reveal_list_done:
             if not st.session_state.admin_reveal_iphone_done:
                 if st.button("Reveal 1st Prize (iPhone)", use_container_width=True, key="btn_admin_reveal_iphone_top"):
                     with st.spinner("Revealing 1st prize winner..."):
@@ -646,6 +733,25 @@ if st.session_state.user_role == "admin":
                     st.session_state.admin_reveal_iphone_done = False
                     st.rerun()
 
+    if not st.session_state.admin_reveal_list_done:
+        st.markdown(
+            '<div class="dark-box" style="text-align:center;padding:28px 20px;">'
+            '<div style="font-size:16px;font-weight:700;color:#ffffff;margin-bottom:6px;">Ready to Reveal Winners (20th to 2nd Position)</div>'
+            '<div style="font-size:13px;color:#808495;">Click below to display the 19 winners from Position #20 down to Position #2, followed by the 1st Prize iPhone winner.</div>'
+            '</div>',
+            unsafe_allow_html=True
+        )
+        b1, b2, b3 = st.columns([1.2, 2, 1.2])
+        with b2:
+            if st.button("Reveal 20th to 2nd Winners", use_container_width=True, key="btn_admin_reveal_20_to_2"):
+                prog = st.progress(0, text="Loading winners...")
+                for pct in range(0, 101, 25):
+                    time.sleep(0.1)
+                    prog.progress(pct, text=f"Loading winners... {pct}%")
+                prog.empty()
+                st.session_state.admin_reveal_list_done = True
+                st.rerun()
+    else:
         visible_rows = list(runners_up_list)
         if st.session_state.admin_reveal_iphone_done:
             visible_rows.append(grand_iphone_winner)
@@ -654,6 +760,10 @@ if st.session_state.user_role == "admin":
         for w in visible_rows:
             if area_sel != "All Sales Areas" and w["sales_area"] != area_sel:
                 continue
+            if ro_sel != "All Retail Outlets":
+                ro_code_filter = ro_sel.split(" - ")[0]
+                if w["ro_code"] != ro_code_filter:
+                    continue
             if search_q:
                 blob = f"{w['rank']} {w['name']} {w['ro_code']} {w['ro_name']} {w['sales_area']} {w['bill_no']} {w['phone']}".lower()
                 if search_q not in blob:
@@ -665,24 +775,24 @@ if st.session_state.user_role == "admin":
             is_first = (w["rank"] == 1)
             row_cls = "first-prize-row" if is_first else ""
             prize_txt = w["prize"] if w.get("prize") else ("Apple iPhone 17 Pro Max" if is_first else "vivo 5G Smartphone")
-            prize_color = "#f37022" if is_first else "#1e293b"
+            prize_color = "#f37022" if is_first else "#fafafa"
             table_rows_html += (
                 f'<tr class="{row_cls}" style="animation-delay: {round(idx * 0.025, 3)}s;">'
                 f'<td style="font-weight:700;color:#f37022;">#{w["rank"]}</td>'
-                f'<td style="font-weight:700;">{w["name"]}</td>'
-                f'<td>{w["ro_name"]} ({w["ro_code"]})</td>'
-                f'<td>{w["sales_area"]}</td>'
+                f'<td style="font-weight:700;color:#ffffff;">{w["name"]}</td>'
+                f'<td style="color:#cbd5e1;">{w["ro_name"]} ({w["ro_code"]})</td>'
+                f'<td style="color:#cbd5e1;">{w["sales_area"]}</td>'
                 f'<td style="font-weight:700;color:{prize_color};">{prize_txt}</td>'
-                f'<td>{w["phone"]} | Bill: {w["bill_no"]}</td>'
+                f'<td style="color:#808495;">{w["phone"]} | Bill: {w["bill_no"]}</td>'
                 f'</tr>'
             )
 
         if not table_rows_html:
-            table_rows_html = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:18px;">No matching winners found.</td></tr>'
+            table_rows_html = '<tr><td colspan="6" style="text-align:center;color:#808495;padding:18px;">No matching winners found.</td></tr>'
 
         st.markdown(
-            f'<div style="overflow-x:auto;margin-top:8px;">'
-            f'<table class="winners-table">'
+            f'<div style="overflow-x:auto;">'
+            f'<table class="dark-winners-table">'
             f'<thead><tr><th>Position</th><th>Winner Name</th><th>Retail Outlet</th><th>Sales Area</th><th>Prize</th><th>Mobile &amp; Bill No.</th></tr></thead>'
             f'<tbody>{table_rows_html}</tbody>'
             f'</table>'
