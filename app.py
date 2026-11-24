@@ -3,6 +3,7 @@ import re
 import time
 import random
 from datetime import date
+from pathlib import Path
 import pandas as pd
 import streamlit as st
 from supabase import create_client, Client
@@ -15,7 +16,12 @@ from PIL import Image
 # ==============================================================================
 SHOW_MEGA_WINNER_DASHBOARD = True
 
-logo_img = "Indian_Oil_Logo.png" if os.path.exists("Indian_Oil_Logo.png") else None
+BASE_DIR = Path(__file__).resolve().parent
+LOCAL_LOGO_PATH = str(BASE_DIR / "Indian_Oil_Logo.png")
+EXCEL_FILE_PATH = str(BASE_DIR / "19+1.xlsx")
+PROD_FALLBACK_URL = "https://images.seeklogo.com/logo-png/28/1/indian-oil-logo-png_seeklogo-284720.png"
+
+logo_img = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else None
 st.set_page_config(
     page_title="IndianOil Mega Lucky Draw | Winners",
     page_icon=logo_img,
@@ -104,7 +110,7 @@ if SHOW_MEGA_WINNER_DASHBOARD:
             font-size: 13px;
             padding: 6px 12px;
             border-radius: 6px;
-            min-width: 76px;
+            min-width: 78px;
             text-align: center;
             margin-right: 16px;
         }
@@ -139,14 +145,20 @@ if SHOW_MEGA_WINNER_DASHBOARD:
     )
 
     @st.cache_data(ttl=60)
-    def load_winners_from_excel(filepath: str = "19+1.xlsx"):
-        if not os.path.exists(filepath):
-            return None, None, f"File '{filepath}' not found in the repository root."
+    def load_winners_from_excel(filepath: str):
+        target_path = filepath if os.path.exists(filepath) else "19+1.xlsx"
+        if not os.path.exists(target_path):
+            return None, None, f"Excel file '19+1.xlsx' was not found in the repository root ({os.getcwd()}). Please upload 19+1.xlsx to your GitHub root folder."
 
-        df = pd.read_excel(filepath, dtype=str)
+        try:
+            df = pd.read_excel(target_path, dtype=str)
+        except ImportError:
+            return None, None, "Missing 'openpyxl' package. Please add 'openpyxl' to requirements.txt in your GitHub repository."
+        except Exception as exc:
+            return None, None, f"Error reading 19+1.xlsx: {exc}"
+
         df.columns = [str(c).strip() for c in df.columns]
 
-        # Flexible column lookup so any standard header naming in 19+1.xlsx works seamlessly
         def find_col(candidates):
             for cand in candidates:
                 for col in df.columns:
@@ -154,14 +166,13 @@ if SHOW_MEGA_WINNER_DASHBOARD:
                         return col
             return None
 
-        col_rank = find_col(["rank", "position", "prize_no", "sl", "serial", "no"])
+        col_rank = find_col(["rank", "position", "prize_no", "sl", "serial"])
         col_name = find_col(["customer_name", "winner_name", "winner", "name"])
         col_phone = find_col(["phone", "mobile", "contact"])
         col_ro_code = find_col(["ro_code", "ro code", "outlet_code"])
         col_ro_name = find_col(["ro_name", "ro name", "outlet_name", "station"])
         col_area = find_col(["sales_area", "sales area", "rsa", "area", "district"])
         col_bill = find_col(["bill", "receipt", "invoice"])
-        col_prize = find_col(["prize", "reward", "gift", "item"])
 
         records = []
         for idx, row in df.iterrows():
@@ -174,7 +185,6 @@ if SHOW_MEGA_WINNER_DASHBOARD:
                 raw_rank = idx + 1
 
             raw_phone = str(row[col_phone]).strip() if col_phone and pd.notna(row[col_phone]) else ""
-            # Mask middle 4 digits for executive stage display while keeping first/last digits clear
             masked_phone = (
                 f"{raw_phone[:2]}XXXX{raw_phone[-4:]}"
                 if len(raw_phone) == 10 and raw_phone.isdigit()
@@ -188,9 +198,11 @@ if SHOW_MEGA_WINNER_DASHBOARD:
                 "ro_code": str(row[col_ro_code]).strip() if col_ro_code and pd.notna(row[col_ro_code]) else "",
                 "ro_name": str(row[col_ro_name]).strip() if col_ro_name and pd.notna(row[col_ro_name]) else "",
                 "sales_area": str(row[col_area]).strip() if col_area and pd.notna(row[col_area]) else "",
-                "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else "",
-                "prize": str(row[col_prize]).strip() if col_prize and pd.notna(row[col_prize]) else ""
+                "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else ""
             })
+
+        if not records:
+            return None, None, "No winner rows found inside 19+1.xlsx."
 
         res_df = pd.DataFrame(records)
         grand_winner_df = res_df[res_df["rank"] == 1]
@@ -208,16 +220,12 @@ if SHOW_MEGA_WINNER_DASHBOARD:
 
         return runners_up, grand_winner, None
 
-    # Session state for two-stage reveal
     if "reveal_list_done" not in st.session_state:
         st.session_state.reveal_list_done = False
     if "reveal_iphone_done" not in st.session_state:
         st.session_state.reveal_iphone_done = False
 
-    # Top Header with IndianOil Logo
-    LOCAL_LOGO_PATH = "Indian_Oil_Logo.png"
-    PROD_FALLBACK_URL = "https://images.seeklogo.com/logo-png/28/1/indian-oil-logo-png_seeklogo-284720.png"
-
+    # Header Section
     h_col1, h_col2 = st.columns([1, 5])
     with h_col1:
         if os.path.exists(LOCAL_LOGO_PATH):
@@ -242,7 +250,7 @@ if SHOW_MEGA_WINNER_DASHBOARD:
             unsafe_allow_html=True
         )
 
-    runners_up_list, grand_iphone_winner, load_err = load_winners_from_excel("19+1.xlsx")
+    runners_up_list, grand_iphone_winner, load_err = load_winners_from_excel(EXCEL_FILE_PATH)
 
     if load_err:
         st.error(load_err)
@@ -384,7 +392,6 @@ if SHOW_MEGA_WINNER_DASHBOARD:
 # MODE 2: ORIGINAL CUSTOMER QR RECEIPT SCAN APP (PRESERVED & HIDDEN)
 # ==============================================================================
 
-# Branding CSS (#f37022 Saffron Accent)
 st.markdown(
     """
     <style>
@@ -462,7 +469,6 @@ def mark_voucher_claimed(vault_id: int):
         except Exception:
             pass
 
-# ----------------- CLAIM MODAL DIALOG -----------------
 @st.dialog("🎉 Congratulations!")
 def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
     st.balloons()
@@ -489,12 +495,8 @@ def show_winner_dialog(voucher_id: int, claim_link: str, denomination: int):
         use_container_width=True
     )
 
-LOCAL_LOGO_PATH = "Indian_Oil_Logo.png"
-PROD_FALLBACK_URL = "https://images.seeklogo.com/logo-png/28/1/indian-oil-logo-png_seeklogo-284720.png"
-
 ro_code = st.query_params.get("ro", None)
 
-# Logo Display
 c1, c2, c3 = st.columns([1, 1.2, 1])
 with c2:
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -510,8 +512,6 @@ if not ro_code:
     st.error("⚠️ Invalid station link. Please scan the official QR code at the IndianOil fuel dispenser.")
     st.stop()
 
-
-# Real-time check directly from Supabase (no cache, 0-second delay)
 def get_station_details(code: str):
     res = db.table("retail_outlets").select("ro_code, ro_name, district, address, is_active, check_5580").eq("ro_code", str(code).strip()).execute()
     return res.data[0] if res.data else None
@@ -521,7 +521,6 @@ if not station:
     st.error(f"⚠️ Retail Outlet Code **{ro_code}** not recognized.")
     st.stop()
 
-# Real-time ban enforcement
 if not station.get("is_active", True):
     st.markdown(
         f"""
@@ -542,7 +541,6 @@ if not station.get("is_active", True):
                     Thank you for being a part of this campaign. <br> The campaign has ended, and we appreciate your participation.
                 </h3>
             </div>
-
         </div>
         """,
         unsafe_allow_html=True
@@ -571,7 +569,6 @@ if "form_submitted" not in st.session_state:
 if "submission_result" not in st.session_state:
     st.session_state.submission_result = None
 
-# Trigger Modal Dialog if pending
 if st.session_state.get("pending_dialog") == "WINNER":
     v_data = st.session_state.get("winning_voucher_data", {})
     st.session_state.pending_dialog = None
@@ -581,7 +578,6 @@ if st.session_state.get("pending_dialog") == "WINNER":
         denomination=v_data.get("denomination", 40)
     )
 
-# ----------------- 2. RESULT SCREENS (WIN & BETTER LUCK NEXT TIME) -----------------
 if st.session_state.form_submitted:
     result = st.session_state.submission_result
 
@@ -668,7 +664,6 @@ if st.session_state.form_submitted:
 
     st.stop()
 
-# ----------------- ENTRY FORM (TRANSACTION NO REMOVED) -----------------
 with st.form("customer_scan_form", clear_on_submit=False):
     st.markdown("#### Enter Fueling Details")
 
@@ -688,7 +683,6 @@ with st.form("customer_scan_form", clear_on_submit=False):
 
     submit_pressed = st.form_submit_button("Submit & Reveal Reward 🎁", use_container_width=True)
 
-# ----------------- EXECUTION & BUSINESS RULES -----------------
 if submit_pressed:
     errors = []
     if not customer_name or len(customer_name) < 2:
@@ -707,13 +701,11 @@ if submit_pressed:
         clean_bill = receipt_no.replace(" ", "").upper()
         normalized_bill = clean_bill[-6:] if len(clean_bill) >= 6 else clean_bill
 
-        # 1. Unique receipt check per RO
         dup_bill = db.table("campaign_entries").select("id").eq("ro_code", ro_code).eq("bill_number", normalized_bill).execute()
         if dup_bill.data:
             st.error("⚠️ This invoice number has already been entered at this outlet.")
             st.stop()
 
-        # 2. Check 1 scan per mobile number per day
         today_iso_start = f"{date.today().isoformat()}T00:00:00"
         daily_mobile_scan = db.table("campaign_entries").select("id")\
             .eq("phone_number", mobile_no)\
@@ -739,7 +731,6 @@ if submit_pressed:
             }
             st.rerun()
 
-        # 3. Winning Rule: 3rd, 13th, 23rd, 33rd... (Every 10 scans starting from scan 3)
         today_ro_scans = db.table("campaign_entries").select("id", count="exact")\
             .eq("ro_code", ro_code)\
             .gte("created_at", today_iso_start)\
@@ -748,7 +739,6 @@ if submit_pressed:
         current_scan_number = (today_ro_scans.count or 0) + 1
         is_cadence_winner = (current_scan_number % 10 == 0)
 
-        # 5580 Category & Rule Check (Starts from 10-11-2026)
         CAMPAIGN_RULE_START_DATE = date(2026, 11, 10)
         is_rule_active = (date.today() >= CAMPAIGN_RULE_START_DATE)
 
@@ -759,7 +749,6 @@ if submit_pressed:
         is_winner = False
 
         if is_cadence_winner and not is_category_a:
-            # 4. Check available quota from ro_daily_quota (13 base + carry over)
             quota_res = db.table("ro_daily_quota").select("*")\
                 .eq("ro_code", ro_code)\
                 .eq("quota_date", str(date.today()))\
@@ -776,12 +765,10 @@ if submit_pressed:
                     has_quota = False
 
             if has_quota:
-                # 5. Exact pattern: 10 of ₹10, 2 of ₹20, 1 of ₹40
                 DAILY_PATTERN = [10, 10, 20, 10, 10, 10, 40, 10, 10, 10, 20, 10, 10]
                 winner_index = claimed_today % len(DAILY_PATTERN)
                 target_denomination = DAILY_PATTERN[winner_index]
 
-                # 1. Fetch available voucher with target denomination (station-specific first)
                 v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                     .eq("ro_code", ro_code)\
                     .eq("denomination", target_denomination)\
@@ -791,7 +778,6 @@ if submit_pressed:
                     .limit(1)\
                     .execute()
 
-                # 2. Then unassigned pool
                 if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .is_("ro_code", "null")\
@@ -802,7 +788,6 @@ if submit_pressed:
                         .limit(1)\
                         .execute()
 
-                # 3. Fallback to any available voucher if target denomination is temporarily out
                 if not v_res.data:
                     v_res = db.table("voucher_vault").select("id, denomination, claim_link")\
                         .ilike("status", "available")\
@@ -828,7 +813,6 @@ if submit_pressed:
                             "claimed_count": claimed_today + 1
                         }).eq("id", q_row["id"]).execute()
 
-                    # Add voucher denomination to check_5580 from 10-11-2026 onwards
                     if is_rule_active:
                         new_check_val = current_check_val + won_denom
                         db.table("retail_outlets").update({
@@ -842,7 +826,6 @@ if submit_pressed:
                         "denomination": won_denom
                     }
 
-        # 6. Insert Entry
         final_outcome = "Won" if is_winner else "Better Luck Next Time"
         claim_url = assigned_voucher["claim_link"] if is_winner else None
         denom_val = assigned_voucher.get("denomination", 40) if is_winner else 40
