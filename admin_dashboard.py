@@ -1,7 +1,10 @@
 import io
 import os
+import re
+import time
 import smtplib
 from datetime import datetime, timedelta
+from pathlib import Path
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -247,7 +250,352 @@ if not st.session_state.authenticated:
 
     st.stop()
 
-# ----------------- LOGGED IN HEADER -----------------
+# ==============================================================================
+# EXECUTIVE ADMIN DASHBOARD ONLY (19 + 1 MEGA LUCKY DRAW WINNERS FROM 19+1.xlsx)
+# ==============================================================================
+if st.session_state.user_role == "admin":
+    EMBEDDED_19_PLUS_1 = [
+        {"rank": 1, "name": "Akshat Bhardwaj", "phone": "89XXXX9956", "ro_code": "138854", "ro_name": "TRINATH SERVICE STATION", "sales_area": "Barasat RSA", "bill_no": "587940"},
+        {"rank": 2, "name": "Rio das", "phone": "62XXXX4145", "ro_code": "196643", "ro_name": "PAUL CHOWDHURY ENTERP", "sales_area": "Barasat RSA", "bill_no": "207725"},
+        {"rank": 3, "name": "Ruma Barat", "phone": "97XXXX7829", "ro_code": "164774", "ro_name": "MADHABI SERVICE STN", "sales_area": "Garia RSA", "bill_no": "534165"},
+        {"rank": 4, "name": "Anupam Mukhopadhyay", "phone": "89XXXX8987", "ro_code": "190654", "ro_name": "PRASADPUR SERVICE STATION", "sales_area": "Garia RSA", "bill_no": "340068"},
+        {"rank": 5, "name": "Amitava Pal", "phone": "81XXXX4776", "ro_code": "338777", "ro_name": "SOUTHERN FUEL SERVICE", "sales_area": "Garia RSA", "bill_no": "222530"},
+        {"rank": 6, "name": "Hirak Mukherjee", "phone": "70XXXX2240", "ro_code": "191100", "ro_name": "MANMATHA SERVICE CENTRE", "sales_area": "Kalyani RSA", "bill_no": "55566"},
+        {"rank": 7, "name": "Khyati Chopra", "phone": "84XXXX4168", "ro_code": "138056", "ro_name": "LAUHATI SERVICE STN", "sales_area": "Kolkata New Town RSA", "bill_no": "206886"},
+        {"rank": 8, "name": "Uma mondal", "phone": "90XXXX5784", "ro_code": "331989", "ro_name": "AGNIV SERVICE STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "688346"},
+        {"rank": 9, "name": "TAPAN KUMAR SARKAR", "phone": "98XXXX7296", "ro_code": "138621", "ro_name": "DELUXE SERVICE STN", "sales_area": "Kolkata South RSA", "bill_no": "407120"},
+        {"rank": 10, "name": "Jadunathchauhan", "phone": "94XXXX9286", "ro_code": "138709", "ro_name": "LUXMI NARAYAN SER. STN", "sales_area": "Kolkata South RSA", "bill_no": "109073"},
+        {"rank": 11, "name": "Mukesh Desai", "phone": "84XXXX2272", "ro_code": "190519", "ro_name": "JEET SERVICE STATION", "sales_area": "Kolkata South RSA", "bill_no": "295240"},
+        {"rank": 12, "name": "Tushar Pujara", "phone": "91XXXX7213", "ro_code": "190523", "ro_name": "OM AUTO SERVICE CORPORATION", "sales_area": "Kolkata South RSA", "bill_no": "994231"},
+        {"rank": 13, "name": "Saptarshi Dasgupta", "phone": "89XXXX2597", "ro_code": "137977", "ro_name": "B C DUTTA & BROTHERS", "sales_area": "Kolkata-North RSA", "bill_no": "808822"},
+        {"rank": 14, "name": "Pooja Verma", "phone": "96XXXX8345", "ro_code": "138661", "ro_name": "HIRJEE AUTO CENTRE", "sales_area": "Kolkata-North RSA", "bill_no": "489947"},
+        {"rank": 15, "name": "Monali Paswan", "phone": "98XXXX0269", "ro_code": "189016", "ro_name": "HAPPY SERVICE STATION", "sales_area": "Kolkata-North RSA", "bill_no": "962116"},
+        {"rank": 16, "name": "Myra Kotecha", "phone": "97XXXX1600", "ro_code": "191111", "ro_name": "THE JANATA S/STATION", "sales_area": "Kolkata-North RSA", "bill_no": "506656"},
+        {"rank": 17, "name": "Madhurima Midya", "phone": "96XXXX8692", "ro_code": "151172", "ro_name": "MA DURGA FUEL STN", "sales_area": "Krishnanagar RSA", "bill_no": "138810"},
+        {"rank": 18, "name": "Priyanka Dutta", "phone": "94XXXX6972", "ro_code": "240739", "ro_name": "G.Q.MONDAL SERVICE STATION", "sales_area": "24 Parganas(S) RSA", "bill_no": "546568"},
+        {"rank": 19, "name": "Kakoli De-Sarkar", "phone": "94XXXX1919", "ro_code": "385566", "ro_name": "ADHOC MATRI MONDIR FUEL STATION", "sales_area": "Kolkata New Town RSA", "bill_no": "169743"},
+        {"rank": 20, "name": "Yuvaan Bhojani", "phone": "97XXXX3991", "ro_code": "392418", "ro_name": "ADHOC MAA SIDDHESHWARI FUEL STATION", "sales_area": "Kalyani RSA", "bill_no": "783884"},
+    ]
+
+    st.markdown(
+        """
+        <style>
+        .block-container {
+            max-width: 960px;
+            padding-top: 1.5rem;
+            padding-bottom: 3rem;
+        }
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes grandRevealScale {
+            0% { opacity: 0; transform: scale(0.94); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .exec-header-box {
+            background: linear-gradient(135deg, #02164f 0%, #0a2a7a 100%);
+            border-bottom: 4px solid #f37022;
+            border-radius: 10px;
+            padding: 20px 26px;
+            color: #ffffff;
+            margin-bottom: 22px;
+        }
+        .winner-row-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #02164f;
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeSlideUp 0.45s ease-out both;
+        }
+        .rank-badge {
+            background-color: #02164f;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            min-width: 78px;
+            text-align: center;
+            margin-right: 16px;
+        }
+        .rank-badge-top3 {
+            background-color: #f37022;
+        }
+        .iphone-grand-card {
+            background: linear-gradient(135deg, #fffdf9 0%, #fff7ed 100%);
+            border: 2px solid #f37022;
+            border-top: 6px solid #02164f;
+            border-radius: 12px;
+            padding: 30px 28px;
+            margin-top: 22px;
+            box-shadow: 0 12px 30px rgba(243, 112, 34, 0.18);
+            animation: grandRevealScale 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .iphone-pill {
+            display: inline-block;
+            background-color: #02164f;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    @st.cache_data(ttl=60)
+    def load_admin_winners():
+        base_dir = Path(__file__).resolve().parent
+        excel_path = base_dir / "19+1.xlsx"
+        target_path = str(excel_path) if excel_path.exists() else "19+1.xlsx"
+        records = None
+
+        if os.path.exists(target_path):
+            try:
+                df = pd.read_excel(target_path, dtype=str)
+                df.columns = [str(c).strip() for c in df.columns]
+
+                def find_col(candidates):
+                    for cand in candidates:
+                        for col in df.columns:
+                            if cand.lower() in col.lower():
+                                return col
+                    return None
+
+                col_rank = find_col(["rank", "position", "prize_no", "sl", "serial"])
+                col_name = find_col(["customer_name", "winner_name", "winner", "name"])
+                col_phone = find_col(["phone", "mobile", "contact"])
+                col_ro_code = find_col(["ro_code", "ro code", "outlet_code"])
+                col_ro_name = find_col(["ro_name", "ro name", "outlet_name", "station"])
+                col_area = find_col(["sales_area", "sales area", "rsa", "area", "district"])
+                col_bill = find_col(["bill", "receipt", "invoice"])
+
+                parsed = []
+                for idx, row in df.iterrows():
+                    raw_rank = None
+                    if col_rank and pd.notna(row[col_rank]):
+                        digits = re.findall(r"\d+", str(row[col_rank]))
+                        if digits:
+                            raw_rank = int(digits[0])
+                    if raw_rank is None:
+                        raw_rank = idx + 1
+
+                    raw_phone = str(row[col_phone]).strip() if col_phone and pd.notna(row[col_phone]) else ""
+                    masked_phone = (
+                        f"{raw_phone[:2]}XXXX{raw_phone[-4:]}"
+                        if len(raw_phone) == 10 and raw_phone.isdigit()
+                        else raw_phone
+                    )
+
+                    parsed.append({
+                        "rank": raw_rank,
+                        "name": str(row[col_name]).strip() if col_name and pd.notna(row[col_name]) else "Verified Participant",
+                        "phone": masked_phone,
+                        "ro_code": str(row[col_ro_code]).strip() if col_ro_code and pd.notna(row[col_ro_code]) else "",
+                        "ro_name": str(row[col_ro_name]).strip() if col_ro_name and pd.notna(row[col_ro_name]) else "",
+                        "sales_area": str(row[col_area]).strip() if col_area and pd.notna(row[col_area]) else "",
+                        "bill_no": str(row[col_bill]).strip() if col_bill and pd.notna(row[col_bill]) else ""
+                    })
+                if parsed:
+                    records = parsed
+            except Exception:
+                records = None
+
+        if not records:
+            records = EMBEDDED_19_PLUS_1
+
+        res_df = pd.DataFrame(records)
+        grand_df = res_df[res_df["rank"] == 1]
+        if grand_df.empty:
+            grand_winner = res_df.iloc[0].to_dict()
+            runners_up = res_df.iloc[1:20].sort_values(by="rank", ascending=False).to_dict("records")
+        else:
+            grand_winner = grand_df.iloc[0].to_dict()
+            runners_up = (
+                res_df[res_df["rank"] != 1]
+                .sort_values(by="rank", ascending=False)
+                .head(19)
+                .to_dict("records")
+            )
+        return runners_up, grand_winner
+
+    if "admin_reveal_list_done" not in st.session_state:
+        st.session_state.admin_reveal_list_done = False
+    if "admin_reveal_iphone_done" not in st.session_state:
+        st.session_state.admin_reveal_iphone_done = False
+
+    # Top Header + Logout
+    h_col1, h_col2, h_col3 = st.columns([1, 4.5, 1.2])
+    with h_col1:
+        st.image(LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else PROD_FALLBACK_URL, width=95)
+    with h_col2:
+        st.markdown(
+            """
+            <div class="exec-header-box">
+                <div style="font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: #fdba74; font-weight: 700;">
+                    IndianOil Kolkata Divisional Office
+                </div>
+                <h2 style="margin: 4px 0 4px 0; color: #ffffff; font-size: 24px;">
+                    Mega Lucky Draw — Official Winners (19 + 1)
+                </h2>
+                <div style="font-size: 13px; color: #e2e8f0;">
+                    Executive Announcement Portal • 19 Smartphone Winners + 1 Grand iPhone Winner
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with h_col3:
+        st.write("")
+        if st.button("Logout", use_container_width=True, key="admin_winner_logout"):
+            st.session_state.admin_reveal_list_done = False
+            st.session_state.admin_reveal_iphone_done = False
+            logout()
+
+    runners_up_list, grand_iphone_winner = load_admin_winners()
+
+    # Stage 1: Reveal 20th to 2nd Winners
+    if not st.session_state.admin_reveal_list_done:
+        st.markdown(
+            """
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 36px 24px; text-align: center; margin: 16px 0;">
+                <h3 style="color: #02164f; margin-top: 0;">Ready for Official Winner Declaration</h3>
+                <p style="color: #475569; font-size: 14px; max-width: 560px; margin: 0 auto 22px auto;">
+                    Click below to unveil the 19 Mega Draw Winners starting from Position #20 down to Position #2.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        c1, c2, c3 = st.columns([1.2, 2, 1.2])
+        with c2:
+            if st.button("REVEAL WINNERS (20th TO 2nd POSITION)", use_container_width=True, key="btn_admin_reveal_20_to_2"):
+                progress_bar = st.progress(0, text="Verifying audit records and preparing winner list...")
+                for pct in range(0, 101, 20):
+                    time.sleep(0.14)
+                    progress_bar.progress(pct, text=f"Loading verified winners... {pct}%")
+                progress_bar.empty()
+                st.session_state.admin_reveal_list_done = True
+                st.rerun()
+
+    # Stage 2: Display 20th -> 2nd List + Grand iPhone Winner Button
+    if st.session_state.admin_reveal_list_done:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0 14px 0;">
+                <h3 style="color: #02164f; margin: 0; font-size: 20px;">Winners List (Position #20 to #2)</h3>
+                <span style="font-size: 12px; color: #64748b; font-weight: 600;">Ordered from #20 (Top) to #2 (Bottom)</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        for i, w in enumerate(runners_up_list):
+            delay_sec = round(i * 0.04, 2)
+            badge_extra_cls = "rank-badge-top3" if w["rank"] in (2, 3) else ""
+            ro_detail = f"{w['ro_name']} ({w['ro_code']})" if w["ro_code"] else w["ro_name"]
+            area_detail = f" | {w['sales_area']}" if w["sales_area"] else ""
+            bill_detail = f" | Bill: {w['bill_no']}" if w["bill_no"] else ""
+
+            st.markdown(
+                f"""
+                <div class="winner-row-card" style="animation-delay: {delay_sec}s;">
+                    <div style="display: flex; align-items: center;">
+                        <div class="rank-badge {badge_extra_cls}">Rank #{w['rank']}</div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: 700; color: #0f172a;">{w['name']}</div>
+                            <div style="font-size: 12px; color: #475569; margin-top: 2px;">
+                                <b>Outlet:</b> {ro_detail}{area_detail}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; font-weight: 700; color: #02164f;">{w['phone']}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Verified Entry{bill_detail}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown("<hr style='border: 0; border-top: 1px solid #cbd5e1; margin: 28px 0;'>", unsafe_allow_html=True)
+
+        if not st.session_state.admin_reveal_iphone_done:
+            st.markdown(
+                """
+                <div style="text-align: center; margin-bottom: 14px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #02164f; letter-spacing: 0.6px; text-transform: uppercase;">
+                        Grand Finale — First Prize Announcement
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            g1, g2, g3 = st.columns([1.1, 2.2, 1.1])
+            with g2:
+                if st.button("REVEAL GRAND IPHONE WINNER (1st PRIZE)", use_container_width=True, key="btn_admin_reveal_iphone"):
+                    with st.spinner("Unlocking Grand Prize Winner..."):
+                        time.sleep(1.1)
+                    st.session_state.admin_reveal_iphone_done = True
+                    st.rerun()
+        else:
+            gw = grand_iphone_winner
+            gw_ro = f"{gw['ro_name']} ({gw['ro_code']})" if gw["ro_code"] else gw["ro_name"]
+            gw_area = gw["sales_area"] if gw["sales_area"] else "Kolkata Divisional Office"
+            gw_bill = gw["bill_no"] if gw["bill_no"] else "Verified"
+
+            st.markdown(
+                f"""
+                <div class="iphone-grand-card">
+                    <div style="text-align: center;">
+                        <span class="iphone-pill">Grand Prize Winner — Position #1</span>
+                        <div style="font-size: 14px; font-weight: 700; color: #f37022; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">
+                            Apple iPhone 17 Pro Max Winner
+                        </div>
+                        <h1 style="margin: 0 0 8px 0; color: #02164f; font-size: 32px; font-weight: 800;">
+                            {gw['name']}
+                        </h1>
+                        <div style="font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 18px;">
+                            Mobile: {gw['phone']} &nbsp;|&nbsp; Invoice No: {gw_bill}
+                        </div>
+                    </div>
+                    <div style="background: #ffffff; border: 1px solid #fed7aa; border-radius: 8px; padding: 14px 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Retail Outlet</div>
+                            <div style="font-size: 14px; color: #0f172a; font-weight: 700;">{gw_ro}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Sales Area</div>
+                            <div style="font-size: 14px; color: #02164f; font-weight: 700;">{gw_area}</div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.write("")
+            r1, r2, r3 = st.columns([2, 1, 2])
+            with r2:
+                if st.button("Reset Reveal", use_container_width=True, key="btn_admin_reset_reveal"):
+                    st.session_state.admin_reveal_list_done = False
+                    st.session_state.admin_reveal_iphone_done = False
+                    st.rerun()
+
+    st.stop()
+
+# ----------------- LOGGED IN HEADER (DEV & RO UNCHANGED) -----------------
 top_col1, top_col2 = st.columns([3, 1])
 is_admin_or_dev = st.session_state.user_role in ["admin", "dev"]
 
@@ -285,10 +633,8 @@ st.divider()
 # ----------------- DATA LOADER -----------------
 @st.cache_data(ttl=15)
 def load_data(role: str, ro_code: str = None):
-    # Retrieve check_5580 alongside outlet details
     outlets_res = db.table("retail_outlets").select("ro_code, ro_name, district, is_active, check_5580").execute()
     
-    # Fetch ALL campaign entries using pagination to bypass Supabase's 1000-row limit
     all_entries = []
     page_size = 1000
     start = 0
@@ -334,11 +680,7 @@ if not df_vouchers.empty:
 
 if not df_entries.empty:
     df_entries["amount"] = pd.to_numeric(df_entries["amount"], errors="coerce").fillna(0.0)
-    
-    # 1. Parse UTC timestamp and convert directly to Indian Standard Time (IST)
     df_entries["created_at"] = pd.to_datetime(df_entries["created_at"], errors="coerce", utc=True).dt.tz_convert("Asia/Kolkata")
-    
-    # 2. Extract IST Date and Time
     df_entries["Date"] = df_entries["created_at"].dt.strftime("%d-%m-%Y")
     df_entries["Time"] = df_entries["created_at"].dt.strftime("%I:%M:%S %p")
     if not df_outlets.empty:
@@ -357,7 +699,6 @@ if st.session_state.user_role == "dev":
             st.markdown("##### Outlet Campaign Status")
             st.caption("Toggle the checkbox to activate/deactivate an outlet.")
             if not df_outlets.empty:
-                # Include check_5580 mapped as Total Sum
                 ro_display = df_outlets[["ro_code", "ro_name", "district", "check_5580", "is_active"]].copy()
                 ro_display["check_5580"] = pd.to_numeric(ro_display["check_5580"], errors="coerce").fillna(0).astype(int)
                 ro_display["is_active"] = ro_display["is_active"].fillna(True).astype(bool)
@@ -469,7 +810,6 @@ with st.sidebar:
 
 st.sidebar.header("🔍 Filters & Controls")
 
-# Calendar Date Picker (Single Date or Range of Dates)
 selected_dates = st.sidebar.date_input(
     "📅 Select Date or Date Range",
     value=(),
@@ -482,16 +822,12 @@ if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
 
 filtered_df = df_entries.copy()
 
-# Apply Calendar Filter
 if not filtered_df.empty and selected_dates:
-    # Ensure entry timestamps have IST dates available for filtering
     entry_dates = filtered_df["created_at"].dt.date
     if isinstance(selected_dates, tuple) or isinstance(selected_dates, list):
         if len(selected_dates) == 1:
-            # Single individual date selected
             filtered_df = filtered_df[entry_dates == selected_dates[0]]
         elif len(selected_dates) == 2:
-            # Group / range of dates selected (start to end)
             start_date, end_date = selected_dates
             filtered_df = filtered_df[(entry_dates >= start_date) & (entry_dates <= end_date)]
     else:
@@ -590,7 +926,6 @@ with left_col:
     st.subheader("🏆 Performance Summary")
     if not filtered_df.empty:
         if is_admin_or_dev:
-            # Ensure ro_name is present and count winners using 'outcome'
             if "ro_name" not in filtered_df.columns:
                 filtered_df["ro_name"] = filtered_df["ro_code"]
 
@@ -622,11 +957,9 @@ with right_col:
     else:
         st.info("No fuel transaction records available.")
 
-    # KPI Card: Total Claimed + Allocated (Developer Dashboard Only)
     if st.session_state.user_role == "dev":
         st.write("")
         if not df_vouchers.empty:
-            # Match status case-insensitively
             disbursed_df = df_vouchers[df_vouchers["status_clean"].isin(["Claimed", "Allocated", "Won"])]
             total_disbursed_amt = disbursed_df["denomination"].sum()
             total_disbursed_count = len(disbursed_df)
